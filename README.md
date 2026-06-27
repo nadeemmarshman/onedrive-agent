@@ -50,8 +50,29 @@ and Claude Cowork:
 ## Repo contents (so far)
 
 - `tools.py` — Phase 1 tool functions
+- `tool_contracts.py` — Phase 2 JSON-schema tool contracts (the format
+  used by MCP and the Anthropic API to describe each function to an LLM)
+- `test_phase2.py` — Phase 2 test suite (see Testing approach below)
 - `sample_data/` — disposable test folder used to validate the functions
   safely, before any work happens against a real OneDrive folder
+
+## Testing approach
+
+Every phase that introduces new functions is tested in two ordered
+layers, growing in scope as the project does:
+
+1. **Unit tests** — each function tested in isolation, including edge
+   cases (empty input, missing folders, near-miss false positives, etc.).
+   These run first and must all pass before integration tests are
+   considered meaningful.
+2. **Integration tests** — functions tested chained together, with data
+   flowing from one into the next exactly as it will in the real agent
+   loop. This is where contract-shape mismatches and "forgot to handle
+   the previous step's output" bugs would surface.
+
+This two-layer structure repeats and expands with each new phase (e.g.
+Phase 3's decision loop gets its own unit tests, then an integration
+test layered on top of the existing chain) rather than being replaced.
 
 ## Notes
 
