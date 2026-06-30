@@ -51,7 +51,16 @@ and Claude Cowork:
   Anthropic API; Claude correctly read the tool contracts and chose to
   call `find_duplicates` and `find_convertible_files` in the same turn,
   having recognized the two checks are independent of each other
-- ⏳ Phase 4 in progress
+- ✅ Phase 4 complete: `agent_loop.py` — the full decide → execute →
+  observe → repeat loop, run successfully end-to-end against the live
+  API. In a real run: Claude called two tools in parallel in iteration
+  1 (both genuinely executed), independently chained their results into
+  a third tool call in iteration 2, then correctly recognized the goal
+  was complete and stopped on its own in iteration 3 — the natural
+  termination path, not the safety-limit fallback. No files were
+  modified or deleted; the agent's own summary correctly stated that
+  human approval (Phase 5) is required before any action is carried out
+- ⏳ Phase 4.5 in progress (resilience & alerting), gated on SendGrid setup
 
 ## Design philosophy: proactive design, not lucky edge-case handling
 
@@ -93,6 +102,13 @@ and building for those on purpose.
 - `decision_loop.py` — Phase 3 decision loop, calling the live Anthropic
   API with the tool contracts; includes error handling for API/network
   failures
+- `agent_loop.py` — Phase 4 full execution loop (decide → execute →
+  observe → repeat), built on top of `decision_loop.py`'s API client.
+  Actually runs the tools Claude decides to call and feeds real results
+  back as observations, looping until the goal is complete or a safety
+  limit is reached. Implements explicit handling for zero/multiple tool
+  calls per turn, malformed arguments, unrecognized tool names, and loop
+  termination (see Design philosophy below)
 - `sample_data/` — disposable test folder used to validate the functions
   safely, before any work happens against a real OneDrive folder
 - `BACKLOG.md` — Agile/Scrum-style Product Backlog and Daily Scrum log,
