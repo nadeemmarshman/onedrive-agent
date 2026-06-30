@@ -1,1 +1,77 @@
-Backlog items go here
+# OneDrive Agent — Product Backlog & Daily Scrum Log
+
+**Purpose:** Agile/Scrum-style tracking artifact for this project, forming
+part of the portfolio of evidence. Demonstrates lightweight application of
+Scrum practices to a solo technical build — adapted deliberately, with the
+adaptation made explicit (see footnotes) rather than presented as textbook
+Scrum, since this project does not run fixed time-boxed Sprints.
+
+## Update log (this file)
+
+| Date | Change |
+|---|---|
+| 2026-06-28 | File created as "Backlog & Daily Standup Log"; Phase 3 closeout checklist item and test-pack backlog item #1 logged. |
+| 2026-06-28 | Retitled to correct Scrum terminology ("Daily Scrum" rather than the colloquial "standup"); retrospective-style questions folded into each Daily Scrum entry rather than run as a separate ceremony, since this project has no fixed Sprint boundary for a true Sprint Retrospective; methodology footnotes added throughout; applied retroactively to the existing entry below without altering its original date or content, only its structure/labeling. |
+| 2026-06-28 | Corrected the Daily Scrum entry to explicitly note that this file's own creation, and the fact it was not yet committed/pushed to GitHub, had been stated in chat but omitted from the artifact itself — added as a blocker/status note, since the Daily Scrum log should reflect everything discussed, not just a subset. |
+
+---
+
+## Product Backlog¹
+
+Status values: **Open** (not yet discussed) | **In Discussion** | **Actioned**
+(decision made, reflected in handoff doc/README — the Product Backlog item
+is then analogous to a closed/delivered Backlog Item²) | **Deferred**
+(explicitly out of scope for now, with reason) | **Rejected** (considered,
+not adopted, with reason)
+
+| # | Raised | Item | Status | Notes |
+|---|---|---|---|---|
+| 1 | 2026-06-28 | Testing strategy and test case design as a separate deliverable: develop test packs, segregated "on paper" by functionality (a design artifact distinct from the actual test code). Add a dedicated test pack for state-transition test cases (tied to the Phase 4.5 state-machine design). | Open | Raised alongside the state-machine framing discussion for Phase 4.5. Fits naturally with the existing two-layer (unit/integration) testing standing rule — this would sit "above" that as a planning artifact, not replace it. |
+| 2 | 2026-06-28 | Frame Phase 4.5's restart-and-resume mechanism explicitly as a state machine (named states + transitions + persisted current-state), rather than ad hoc retry/variable-saving logic — including the safety property that `AWAITING_HUMAN_APPROVAL` must never be silently skipped past on resume. | Actioned | Added to handoff doc v4.0, "Note on Phase 4.5" section, with a proposed state diagram. Implementation deferred to when Phase 4.5 is actually built — this entry records the design decision, not the code. |
+
+---
+
+## Daily Scrum Log³
+
+Held at the start of each working session. Three core questions (per the
+Scrum Guide's Daily Scrum⁴), with a fourth, retrospective-style question
+added to capture continuous-improvement thinking without requiring a
+separate, Sprint-boundary-dependent ceremony⁵:
+
+1. **What did we complete or solve since the last session?**
+2. **What's planned / where are we headed next?**
+3. **Any blockers?**
+4. **Retrospective note⁶ — what did we miss, learn, or newly identify** (process or scope) that wasn't yet captured in the project artifacts, and has it been added to the Product Backlog?
+
+| Date | Completed/solved since last session | Planned next | Blockers | Retrospective note |
+|---|---|---|---|---|
+| 2026-06-28 | Phase 3 confirmed complete in chat (live API call succeeded; error handling added). Phase 4.5 scoped and inserted into the plan (handoff doc v4.0 drafted). This `BACKLOG.md` file itself created and restructured to correct Scrum terminology. | Phase 4 build (core decision-execution loop), gated on Phase 3 closeout being confirmed done by {{owner}}. | Phase 3 closeout checklist outstanding (6 items — doc swap, local file saves, git commit/push). SendGrid account setup outstanding, needed before Phase 4.5. **`BACKLOG.md` itself is not yet committed/pushed to GitHub** — not part of the Phase 3 closeout checklist (didn't exist when that checklist was set), so it doesn't block Phase 4, but should be folded into the next git commit. | Identified that "restart-and-resume" is genuinely state-machine logic, not ad hoc retry logic — added to Product Backlog as a design approach for Phase 4.5, not yet formally scoped into the handoff doc. Also identified that test-case design itself deserves to be a separate, "on paper" deliverable (test packs) rather than only living as test code — added as Backlog item #1. |
+| 2026-06-28 | State-machine framing for Phase 4.5 actioned: added to handoff doc v4.0 (still open, not yet version-bumped, since Phase 3's closeout checklist — not this content — is what gates progress). Backlog item #2 marked Actioned. | Still gated on Phase 3 closeout checklist confirmation by {{owner}} before Phase 4 build begins. | Same as above — Phase 3 closeout checklist and SendGrid setup both still outstanding. `BACKLOG.md` still not yet committed to GitHub. | Confirmed the distinction between "raising/discussing an idea" (Backlog) and "deciding and documenting it" (handoff doc) is working as intended — the state-machine idea moved cleanly from Backlog item #2 into the handoff doc's Phase 4.5 section without needing a version bump, since v4.0 was still open. |
+
+---
+
+## Footnotes (methodology reference)
+
+1. **Product Backlog** — standard Scrum artifact: an ordered list of
+   everything that might be needed, not yet committed to a Sprint. Used
+   here for ideas/scope questions raised mid-build, before being actioned
+   into the handoff document.
+2. In real Scrum, Backlog Items are typically refined into a Sprint
+   Backlog and "Done" per a Definition of Done. This project substitutes
+   "Actioned → reflected in handoff doc/README" as its lightweight
+   equivalent, given there is no formal Sprint cycle.
+3. **Daily Scrum** is the correct Scrum Guide term (commonly nicknamed
+   "stand-up" in industry, but "Daily Scrum" is the formal name used here
+   deliberately).
+4. The Scrum Guide's three Daily Scrum questions are adapted here as
+   "what did we complete," "what's planned," and "blockers" — functionally
+   equivalent to "what I did yesterday / what I'll do today / impediments."
+5. A **Sprint Retrospective** is formally an end-of-Sprint ceremony focused
+   on process improvement, requiring a fixed Sprint boundary. This project
+   is phase-driven with irregular session cadence, not time-boxed Sprints,
+   so a separate Retrospective ceremony would misuse the term. Instead,
+   retrospective-style reflection is folded into each Daily Scrum entry —
+   an explicit, intentional adaptation, not a terminology error.
+6. This column is the project's adapted substitute for a Sprint
+   Retrospective's "what went well / what didn't / what will we change"
+   reflection — scoped to a single working session rather than a Sprint.
