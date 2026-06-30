@@ -90,8 +90,20 @@ and building for those on purpose.
 - `tool_contracts.py` — Phase 2 JSON-schema tool contracts (the format
   used by MCP and the Anthropic API to describe each function to an LLM)
 - `test_phase2.py` — Phase 2 test suite (see Testing approach below)
+- `decision_loop.py` — Phase 3 decision loop, calling the live Anthropic
+  API with the tool contracts; includes error handling for API/network
+  failures
 - `sample_data/` — disposable test folder used to validate the functions
   safely, before any work happens against a real OneDrive folder
+- `BACKLOG.md` — Agile/Scrum-style Product Backlog and Daily Scrum log,
+  tracked as part of the portfolio of evidence (see file for methodology
+  notes)
+- `RAID_LOG.md` / `RAID_Log.xlsx` — Risks, Assumptions, Issues, and
+  Dependencies log; a standard PM control artifact tracking project risk
+  separately from day-to-day Scrum delivery tracking
+- `build_raid_log.py` — the script used to generate `RAID_Log.xlsx`,
+  included for transparency/reproducibility rather than hand-building the
+  spreadsheet
 
 ## Testing approach
 
