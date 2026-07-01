@@ -21,6 +21,22 @@ as incidental behavior:
   [RISK 4] No explicit loop-termination condition
   [RISK 5] Real API/network failures during a call in the loop
 
+LOGGING DESIGN:
+  Built-in Python logging writes simultaneously to the console AND a
+  timestamped file under logs/ -- one file per run, never overwritten.
+
+  Log verbosity is deliberately tiered:
+    INFO    -- abbreviated summaries of normal operation (tool name +
+               argument shape + result count). Kept lean so logs are
+               scannable without noise.
+    WARNING -- unexpected but recoverable events. Full detail always
+               preserved, since these need to be understood.
+    ERROR   -- failures that stop or degrade the loop. Full detail
+               always preserved, since these are what you diagnose.
+
+  The INFO/WARNING/ERROR distinction matters for Phase 4.5: email
+  alerts fire on ERROR-level events only, not routine INFO messages.
+
 IMPORTANT: propose_action() is the only "action" tool in this agent --
 per the project's design, NOTHING in Phases 1-4 deletes or modifies a
 real file. find_duplicates/find_convertible_files only read and report;
@@ -30,19 +46,18 @@ behind Phase 5's human-approval step, which does not exist yet.
 
 import inspect
 import json
+import logging
+from datetime import datetime
+from pathlib import Path
 
 import anthropic
 
 from tools import scan_folder, find_duplicates, find_convertible_files, propose_action
 from tool_contracts import TOOL_CONTRACTS
-from decision_loop import get_client  # reuse Phase 3's proven API-key loading
+from decision_loop import get_client
 
 
-MAX_ITERATIONS = 6  # [RISK 4] hard safety cap, separate from the "no more
-                     # tool calls" natural stopping condition below -- this
-                     # protects against an unexpected infinite back-and-forth
-                     # (and runaway API cost) even if something behaves
-                     # unexpectedly.
+MAX_ITERATIONS = 6
 
 FUNCTION_MAP = {
     "scan_folder": scan_folder,
@@ -52,18 +67,110 @@ FUNCTION_MAP = {
 }
 
 
+def _summarise_args(arguments: dict) -> str:
+    """
+    Produce a compact, human-readable summary of tool arguments for
+    INFO-level log lines -- shows argument names and shapes (e.g. list
+    length), not full values. Full values are never logged at INFO level
+    since they can be very long (e.g. a list of 100 file dicts).
+
+    Examples:
+        {"path": "sample_data", "recursive": True}
+        → path='sample_data', recursive=True
+
+        {"files": [{...}, {...}, {...}]}
+        → files=[3 items]
+
+        {"duplicate_groups": [[...]], "convertible_files": [{...}]}
+        → duplicate_groups=[1 group], convertible_files=[1 item]
+    """
+    parts = []
+    for key, val in arguments.items():
+        if isinstance(val, list):
+            # Special case: duplicate_groups is a list of lists --
+            # label it as "groups" to make the summary more meaningful.
+            if key == "duplicate_groups":
+                parts.append(f"{key}=[{len(val)} group(s)]")
+            else:
+                parts.append(f"{key}=[{len(val)} item(s)]")
+        elif isinstance(val, str):
+            parts.append(f"{key}='{val}'")
+        else:
+            parts.append(f"{key}={val}")
+    return ", ".join(parts)
+
+
+def _summarise_result(tool_name: str, result) -> str:
+    """
+    Produce a compact summary of a tool's return value for INFO-level
+    log lines. Each tool's result shape is known, so we can give a
+    meaningful count rather than a generic "result returned."
+    """
+    if tool_name == "scan_folder":
+        return f"{len(result)} file(s) found"
+    elif tool_name == "find_duplicates":
+        return f"{len(result)} duplicate group(s) found"
+    elif tool_name == "find_convertible_files":
+        return f"{len(result)} convertible file(s) found"
+    elif tool_name == "propose_action":
+        return f"{len(result)} proposal(s) generated"
+    else:
+        # Fallback for any future tool not yet listed here
+        if isinstance(result, list):
+            return f"{len(result)} item(s) returned"
+        return "completed"
+
+
+def setup_logging() -> logging.Logger:
+    """
+    Configure built-in Python logging to write simultaneously to the
+    console and a timestamped file under logs/.
+
+    Console: INFO and above (lean summaries of normal operation).
+    File: DEBUG and above (captures everything, including internal
+          debug detail not shown on the console).
+    """
+    logs_dir = Path("logs")
+    logs_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = logs_dir / f"agent_run_{timestamp}.txt"
+
+    logger = logging.getLogger("agent_loop")
+    logger.setLevel(logging.DEBUG)
+
+    # Shorter timestamp format (HH:MM only) for INFO lines -- sufficient
+    # for a single run's log, and keeps lines compact.
+    # WARNING and ERROR use full timestamp since they need precise timing
+    # for diagnosis. Both handlers share one formatter for simplicity;
+    # the level distinction is in the message content, not the format.
+    formatter = logging.Formatter(
+        fmt="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M",
+    )
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    logger.info(f"Run started | log: {log_file}")
+    return logger
+
+
+logger = setup_logging()
+
+
 def validate_arguments(tool_name: str, arguments: dict) -> str | None:
     """
-    [RISK 2] Tool-call arguments that don't match what the function expects.
-
-    Checks that every argument Claude supplied is one the real function
-    actually accepts, and that every REQUIRED parameter (no default
-    value) is present. This runs BEFORE we ever call the real function
-    with **arguments, so a malformed call fails with a clear message
-    instead of a confusing Python TypeError deep inside tools.py.
-
-    Returns None if the arguments look valid, or an error message
-    string describing what's wrong if not.
+    [RISK 2] Validate tool arguments against the real function signature
+    before calling anything. Returns None if valid, error string if not.
     """
     func = FUNCTION_MAP[tool_name]
     sig = inspect.signature(func)
@@ -72,7 +179,6 @@ def validate_arguments(tool_name: str, arguments: dict) -> str | None:
         name for name, param in sig.parameters.items()
         if param.default is inspect.Parameter.empty
     }
-
     supplied_names = set(arguments.keys())
 
     unexpected = supplied_names - valid_param_names
@@ -88,43 +194,41 @@ def validate_arguments(tool_name: str, arguments: dict) -> str | None:
 
 def execute_tool_call(tool_name: str, arguments: dict) -> dict:
     """
-    Actually run a tool Claude decided to call, with the proactive-design
-    safety checks applied before anything real happens.
-
-    Always returns a dict with either a "result" or an "error" key --
-    never raises -- so the caller can always feed *something* coherent
-    back to Claude as the next observation, rather than the whole loop
-    crashing because one tool call went wrong.
+    Run a tool Claude decided to call, with safety checks first.
+    Always returns a dict with 'result' or 'error' -- never raises.
     """
-    # [RISK 3] A tool name Claude requests that isn't recognized.
-    # This matters more here than in Phase 3, because Phase 3 only ever
-    # printed the decision -- it never tried to actually look the name
-    # up and call it. A drifted/invalid tool name must not crash the loop.
+    # [RISK 3] Unrecognized tool name -- full detail in WARNING
     if tool_name not in FUNCTION_MAP:
-        return {"error": f"Unrecognized tool name: '{tool_name}'. No such tool exists."}
+        msg = f"Unrecognized tool name: '{tool_name}'. Known tools: {list(FUNCTION_MAP.keys())}"
+        logger.warning(msg)
+        return {"error": msg}
 
     validation_error = validate_arguments(tool_name, arguments)
     if validation_error:
+        # Full detail in WARNING -- validation failures need to be understood
+        logger.warning(f"Argument validation failed | {tool_name} | {validation_error}")
         return {"error": validation_error}
 
     func = FUNCTION_MAP[tool_name]
     try:
         result = func(**arguments)
+        # INFO: abbreviated summary only -- result counts, not full data
+        logger.info(f"  Result: {_summarise_result(tool_name, result)}")
         return {"result": result}
     except Exception as e:
-        # A defensive last line, not the primary safety net -- the
-        # validation above should catch malformed arguments before this
-        # point. This exists for genuinely unexpected runtime errors
-        # (e.g. a file that existed when scanned but was deleted by the
-        # time a later tool tried to read it), so even those report
-        # back cleanly instead of crashing the whole agent loop.
-        return {"error": f"{tool_name} raised an unexpected error: {e}"}
+        # Full detail in ERROR -- unexpected failures need full context
+        msg = f"{tool_name} raised an unexpected error: {type(e).__name__}: {e}"
+        logger.error(msg)
+        return {"error": msg}
 
 
 def run_agent_loop(goal: str, starting_folder: str = "sample_data") -> None:
-    client = get_client()
+    logger.info(f"Goal: {goal}")
+    logger.info(f"Scanning: {starting_folder}")
 
+    client = get_client()
     initial_files = scan_folder(starting_folder, recursive=True)
+    logger.info(f"Scan complete: {len(initial_files)} file(s) found")
 
     messages = [
         {
@@ -141,12 +245,9 @@ def run_agent_loop(goal: str, starting_folder: str = "sample_data") -> None:
     ]
 
     for iteration in range(1, MAX_ITERATIONS + 1):
-        print(f"\n{'=' * 60}\nITERATION {iteration}\n{'=' * 60}")
+        logger.info(f"--- Iteration {iteration} ---")
 
-        # [RISK 5] Real API/network failures during the call itself.
-        # Reuses the same specific, named exception handling proven in
-        # Phase 3 -- but now it must survive happening mid-loop, not
-        # just on a single one-shot call.
+        # [RISK 5] API/network failures -- full detail in ERROR
         try:
             response = client.messages.create(
                 model="claude-sonnet-4-6",
@@ -155,56 +256,47 @@ def run_agent_loop(goal: str, starting_folder: str = "sample_data") -> None:
                 messages=messages,
             )
         except anthropic.AuthenticationError:
-            print("ERROR: Authentication failed. Check ANTHROPIC_API_KEY.")
+            logger.error("Authentication failed. Check ANTHROPIC_API_KEY.")
             return
         except anthropic.RateLimitError:
-            print("ERROR: Rate limit hit. Stopping loop early -- try again shortly.")
+            logger.error("Rate limit hit. Stopping loop -- try again shortly.")
             return
         except anthropic.APIConnectionError:
-            print("ERROR: Could not connect to the Anthropic API. Check your connection.")
+            logger.error("Connection failed. Check your internet connection.")
             return
         except anthropic.APIStatusError as e:
-            print(f"ERROR: API returned status {e.status_code}: {e.message}")
+            logger.error(f"API error status {e.status_code}: {e.message}")
             return
 
-        # [RISK 1] Claude returning zero, one, or multiple tool calls.
-        # Collect ALL tool_use blocks this turn -- not just the first --
-        # and separately track any plain-text commentary Claude gave.
-        tool_calls = [block for block in response.content if block.type == "tool_use"]
-        text_blocks = [block for block in response.content if block.type == "text"]
+        # [RISK 1] Zero, one, or multiple tool calls per turn
+        tool_calls = [b for b in response.content if b.type == "tool_use"]
+        text_blocks = [b for b in response.content if b.type == "text"]
 
         for block in text_blocks:
-            print(f"\n[Claude said]: {block.text}")
+            # Claude's commentary: log first line only at INFO (lean),
+            # full text goes to DEBUG for the file log
+            first_line = block.text.split("\n")[0][:120]
+            logger.info(f"  Claude: {first_line}{'...' if len(block.text) > 120 else ''}")
+            logger.debug(f"  Claude (full): {block.text}")
 
-        # Natural stopping condition: Claude made no tool calls this
-        # turn, meaning it considers the goal complete (or has nothing
-        # further to propose). This is the "normal" way the loop ends,
-        # distinct from the MAX_ITERATIONS safety cap.
+        # Natural stop: Claude decided it's done
         if not tool_calls:
-            print("\n[Loop complete]: Claude made no further tool calls.")
+            logger.info(f"Loop complete — natural stop after {iteration} iteration(s)")
             return
 
-        # Claude's response (including its tool_use blocks) must be
-        # added to the conversation history before we can reply with
-        # tool results -- this is required by the API's message format.
         messages.append({"role": "assistant", "content": response.content})
 
         tool_results_content = []
         for call in tool_calls:
-            print(f"\n[Claude calls]: {call.name}")
-            print(f"[Arguments]: {json.dumps(call.input, indent=2)}")
+            # INFO: abbreviated -- tool name + argument shapes only
+            logger.info(f"  Calling: {call.name}({_summarise_args(call.input)})")
 
             outcome = execute_tool_call(call.name, call.input)
 
             if "error" in outcome:
-                print(f"[Result]: ERROR -- {outcome['error']}")
-            else:
-                print(f"[Result]: {json.dumps(outcome['result'], indent=2, default=str)[:500]}")
+                # ERROR: already logged inside execute_tool_call with full detail
+                pass
 
-            # Feed the real outcome (success or error) back as an
-            # observation, so Claude can see what actually happened and
-            # decide the next step -- including recovering from an
-            # error if possible, rather than the loop just halting.
             tool_results_content.append({
                 "type": "tool_result",
                 "tool_use_id": call.id,
@@ -213,14 +305,11 @@ def run_agent_loop(goal: str, starting_folder: str = "sample_data") -> None:
 
         messages.append({"role": "user", "content": tool_results_content})
 
-    # [RISK 4] Loop-termination condition: if we get here, we hit
-    # MAX_ITERATIONS without Claude naturally stopping. This is reported
-    # explicitly, not silently -- a portfolio-credible agent should never
-    # just quietly stop without saying why.
-    print(f"\n{'=' * 60}")
-    print(f"[Loop stopped]: reached the safety limit of {MAX_ITERATIONS} iterations "
-          f"without Claude indicating the goal was complete.")
-    print("=" * 60)
+    # [RISK 4] Safety cap reached -- WARNING since it's unexpected
+    logger.warning(
+        f"Safety cap reached: {MAX_ITERATIONS} iterations without natural stop. "
+        f"Review the run log for unexpected behaviour."
+    )
 
 
 if __name__ == "__main__":
