@@ -60,7 +60,37 @@ and Claude Cowork:
   termination path, not the safety-limit fallback. No files were
   modified or deleted; the agent's own summary correctly stated that
   human approval (Phase 5) is required before any action is carried out
-- ⏳ Phase 4.5 in progress (resilience & alerting), gated on SendGrid setup
+- ✅ Phase 4.5 complete: `resilience.py` — email alerting via SendGrid
+  with 7 named alert functions structured around a 5W incident-management
+  framework (What/When/Where/Triggered by/Why/Steps), and an explicit
+  state machine (SCANNING → AWAITING_DECISION → EXECUTING_TOOL →
+  AWAITING_HUMAN_APPROVAL → DONE) persisted to disk at each transition,
+  enabling restart-and-resume after an abrupt stop (e.g. load shedding).
+  The AWAITING_HUMAN_APPROVAL state carries a safety guarantee: resume
+  logic never silently skips past it.
+- ✅ Pre-Phase-5 quality gate complete: `test_phase3_4_45.py` — 31 unit
+  tests + 3 integration tests (34 total, all passing), covering explicit
+  negative/red-line scenarios for Phases 3, 4, and 4.5 (corrupted state
+  file, invalid state transitions, API failure branches, masked credential
+  handling, alert message content verification, and the AWAITING_HUMAN_APPROVAL
+  safety guarantee under resume)
+- ⏳ Phase 5 next — human-approval gate before any destructive action executes
+
+## Project location and key paths
+
+These paths are referenced in automated alert emails — check here
+first if an alert tells you to "see README.md for the correct path."
+
+| Item | Default location |
+|---|---|
+| Project folder (code) | `C:\Dev\onedrive-agent\` |
+| Agent script to run | `python agent_loop.py` (run from the project folder) |
+| State file (resume/restart) | `agent_state.json` in the project folder |
+| Run logs | `logs\` subfolder inside the project folder |
+| Environment variables | Windows User-level — set via PowerShell, persist across sessions |
+
+If you have moved the project to a different folder, update this
+table so the alert instructions remain accurate.
 
 ## Design philosophy: proactive design, not lucky edge-case handling
 
@@ -109,6 +139,14 @@ and building for those on purpose.
   limit is reached. Implements explicit handling for zero/multiple tool
   calls per turn, malformed arguments, unrecognized tool names, and loop
   termination (see Design philosophy below)
+- `resilience.py` — Phase 4.5 resilience and alerting: email alerts via
+  SendGrid (7 named alert functions, each structured around a 5W
+  incident-management framework with graduated urgency and masked user
+  credentials); explicit state machine with state persisted to disk for
+  restart-and-resume after abrupt interruption (e.g. load shedding)
+- `test_phase3_4_45.py` — pre-Phase-5 quality gate test suite: 34 tests
+  (31 unit + 3 integration) covering Phases 3, 4, and 4.5, with explicit
+  negative/red-line cases for every failure boundary
 - `sample_data/` — disposable test folder used to validate the functions
   safely, before any work happens against a real OneDrive folder
 - `BACKLOG.md` — Agile/Scrum-style Product Backlog and Daily Scrum log,
