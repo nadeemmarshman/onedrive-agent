@@ -60,7 +60,7 @@ Things this project relies on, often external, that aren't directly controlled.
 |---|---|---|---|---|
 | D1 | 2026-06-26 | Anthropic API availability and billing (console.anthropic.com) | Phase 3 onward cannot function without a live, funded API key. | Active — funded, key created and working |
 | D2 | 2026-06-26 | GitHub availability, as the portfolio repo's host | The actual shareable deliverable lives here; repo visibility (Phase 6) also depends on GitHub. | Active |
-| D3 | 2026-06-28 | SendGrid account, sender verification, and API availability | Phase 4.5's email alerting cannot function without this. | Pending — account setup not yet complete |
+| D3 | 2026-06-28 | SendGrid account, sender verification, and API availability | Phase 4.5's email alerting cannot function without this. | Active — account created (free trial to 2026-08-29), Single Sender Verification completed (`nadeemmarshman@gmail.com`), API key rotated and stored as `SENDGRID_API_KEY` environment variable (2026-07-01) |
 | D4 | 2026-06-26 | Local machine stability / power supply | The agent's own resilience design (Phase 4.5) exists specifically because this dependency is unreliable (load shedding) — see Risk R1. | Active — ongoing operational reality, not something to "resolve," only design around |
 
 ---
