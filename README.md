@@ -110,7 +110,7 @@ If you move the project, update this table so alert instructions stay accurate.
 | 4 | Full execution loop — decide, execute, observe, repeat; all 5 proactive-design risks handled explicitly | ✅ Complete |
 | 4.5 | Resilience & Alerting — SendGrid email alerts (5W incident framework), state machine with restart-and-resume for load-shedding resilience | ✅ Complete |
 | 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
-| 6 | Polish — full README, architecture diagram, repo public, resume bullet | ⏳ In progress |
+| 6 | Polish — full README, architecture diagram, repo public | ✅ Complete |
 | 7 | Comparison against Claude Cowork (Anthropic's own production agent) — evaluate the hand-built version against a finished product | Planned |
 
 ---
@@ -203,7 +203,9 @@ skipped and flagged as not meaningful until the unit layer is clean.
 - ✅ Phase 5 complete: `approval_gate.py` — proven in a live run: invalid
   input caught and re-prompted, real file deleted on approval, rejected
   action correctly skipped, pre-run snapshot verified with matching MD5 hashes
-- ⏳ Phase 6 in progress
+- ✅ Phase 6 complete: full README, architecture diagram (`architecture.svg`
+  rendering inline on the repo landing page), repo switched to Public
+- 🔜 Phase 7 planned — comparison against Claude Cowork
 
 ---
 
