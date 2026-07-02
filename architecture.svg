@@ -1,0 +1,117 @@
+<svg width="680" viewBox="0 0 680 740" xmlns="http://www.w3.org/2000/svg" role="img" style="background:#ffffff;font-family:Arial,sans-serif">
+<title>OneDrive Cleanup Agent — architecture diagram</title>
+<desc>Flowchart showing the agent loop from scanning through Claude's decision, tool execution, human approval gate, and execution, with the state machine and alerting layer shown as supporting infrastructure.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<!-- Phase labels (left margin) -->
+<text font-size="11" fill="#999" x="36" y="98" text-anchor="middle">Phase 1</text>
+<text font-size="11" fill="#999" x="36" y="198" text-anchor="middle">Phase 3–4</text>
+<text font-size="11" fill="#999" x="36" y="318" text-anchor="middle">Phase 1</text>
+<text font-size="11" fill="#999" x="36" y="418" text-anchor="middle">Phase 5</text>
+<text font-size="11" fill="#999" x="36" y="538" text-anchor="middle">Phase 5</text>
+
+<!-- ROW 1: Scan folder -->
+<rect x="240" y="70" width="200" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#085041" x="340" y="91" text-anchor="middle">Scan folder</text>
+<text font-size="11" fill="#0F6E56" x="340" y="108" text-anchor="middle">find duplicates · find convertible</text>
+
+<!-- arrow down -->
+<line x1="340" y1="122" x2="340" y2="148" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- ROW 2: Claude decides -->
+<rect x="220" y="148" width="240" height="52" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#26215C" x="340" y="168" text-anchor="middle">Claude decides</text>
+<text font-size="11" fill="#534AB7" x="340" y="186" text-anchor="middle">reads tool contracts · calls tools</text>
+
+<!-- arrow down -->
+<line x1="340" y1="200" x2="340" y2="218" stroke="#888" stroke-width="1"/>
+
+<!-- fan-out lines -->
+<path d="M340 218 L340 220 L150 220 L150 226" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M340 218 L340 226" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M340 218 L340 220 L530 220 L530 226" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- ROW 3: Three tools -->
+<rect x="68" y="226" width="164" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text font-size="12" font-weight="600" fill="#085041" x="150" y="246" text-anchor="middle">find_duplicates()</text>
+<text font-size="11" fill="#0F6E56" x="150" y="264" text-anchor="middle">content hash · groups</text>
+
+<rect x="258" y="226" width="164" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text font-size="12" font-weight="600" fill="#085041" x="340" y="246" text-anchor="middle">find_convertible()</text>
+<text font-size="11" fill="#0F6E56" x="340" y="264" text-anchor="middle">.bmp → .png · .doc → .docx</text>
+
+<rect x="448" y="226" width="164" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text font-size="12" font-weight="600" fill="#085041" x="530" y="246" text-anchor="middle">propose_action()</text>
+<text font-size="11" fill="#0F6E56" x="530" y="264" text-anchor="middle">structured proposals only</text>
+
+<!-- converge lines -->
+<path d="M150 278 L150 320 L340 320 L340 334" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M340 278 L340 334" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M530 278 L530 320 L340 320 L340 334" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- ROW 4: Full proposal list -->
+<rect x="220" y="334" width="240" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#412402" x="340" y="354" text-anchor="middle">Full proposal list</text>
+<text font-size="11" fill="#854F0B" x="340" y="372" text-anchor="middle">shown to user before any action</text>
+
+<!-- arrow down -->
+<line x1="340" y1="386" x2="340" y2="412" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- ROW 5: Human approval gate -->
+<rect x="200" y="412" width="280" height="52" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="1.25"/>
+<text font-size="13" font-weight="600" fill="#4A1B0C" x="340" y="432" text-anchor="middle">Human approval gate</text>
+<text font-size="11" fill="#993C1D" x="340" y="450" text-anchor="middle">approve / reject per item · pre-run snapshot</text>
+
+<!-- branch lines -->
+<path d="M310 464 L280 492" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M370 464 L400 492" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<text font-size="11" fill="#555" x="258" y="488" text-anchor="middle">approved</text>
+<text font-size="11" fill="#555" x="422" y="488" text-anchor="middle">rejected</text>
+
+<!-- ROW 6: Execute / Skip -->
+<rect x="160" y="500" width="160" height="44" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#173404" x="240" y="522" text-anchor="middle">Execute action</text>
+
+<rect x="360" y="500" width="160" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#2C2C2A" x="440" y="522" text-anchor="middle">Skip · continue</text>
+
+<!-- converge to Done -->
+<path d="M240 544 L240 580 L340 580 L340 606" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+<path d="M440 544 L440 580 L340 580 L340 606" fill="none" stroke="#888" stroke-width="1" marker-end="url(#arrow)"/>
+
+<!-- ROW 7: Done -->
+<rect x="260" y="606" width="160" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text font-size="13" font-weight="600" fill="#2C2C2A" x="340" y="628" text-anchor="middle">Done</text>
+
+<!-- RIGHT RAIL: State machine -->
+<rect x="570" y="334" width="96" height="64" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.75"/>
+<text font-size="12" font-weight="600" fill="#042C53" x="618" y="354" text-anchor="middle">State</text>
+<text font-size="12" font-weight="600" fill="#042C53" x="618" y="370" text-anchor="middle">machine</text>
+<text font-size="11" fill="#185FA5" x="618" y="388" text-anchor="middle">persisted to disk</text>
+<path d="M570 366 L480 386" fill="none" stroke="#aaa" stroke-width="0.75" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+<!-- RIGHT RAIL: SendGrid alerts -->
+<rect x="570" y="430" width="96" height="64" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.75"/>
+<text font-size="12" font-weight="600" fill="#042C53" x="618" y="450" text-anchor="middle">SendGrid</text>
+<text font-size="12" font-weight="600" fill="#042C53" x="618" y="466" text-anchor="middle">alerts</text>
+<text font-size="11" fill="#185FA5" x="618" y="484" text-anchor="middle">5W · masked ID</text>
+<path d="M570 462 L482 462" fill="none" stroke="#aaa" stroke-width="0.75" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+<!-- LEGEND -->
+<rect x="68" y="672" width="14" height="14" rx="3" fill="#1D9E75"/>
+<text font-size="11" fill="#444" x="88" y="683">Tool functions (Phase 1)</text>
+<rect x="210" y="672" width="14" height="14" rx="3" fill="#7F77DD"/>
+<text font-size="11" fill="#444" x="230" y="683">LLM decision (Phase 3–4)</text>
+<rect x="370" y="672" width="14" height="14" rx="3" fill="#D85A30"/>
+<text font-size="11" fill="#444" x="390" y="683">Governance gate (Phase 5)</text>
+<rect x="540" y="672" width="14" height="14" rx="3" fill="#378ADD"/>
+<text font-size="11" fill="#444" x="560" y="683">Resilience (Phase 4.5)</text>
+
+<!-- Title -->
+<text font-size="14" font-weight="600" fill="#333" x="340" y="38" text-anchor="middle">OneDrive Cleanup Agent — architecture</text>
+
+</svg>

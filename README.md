@@ -38,6 +38,8 @@ connectors, and Cowork:
 
 ## Architecture
 
+![OneDrive Cleanup Agent architecture diagram](architecture.svg)
+
 The agent runs in phases, each building on the last:
 
 ```
