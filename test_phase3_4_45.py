@@ -86,6 +86,11 @@ from resilience import (
     send_alert, alert_on_error,
     STATE_FILE,
 )
+import approval_gate
+from approval_gate import (
+    write_snapshot, present_proposals, execute_approved_actions,
+    run_approval_gate, SNAPSHOT_FILE,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -761,6 +766,253 @@ def test_integration_error_path_returns_error_dict_not_raises():
 
 
 # ---------------------------------------------------------------------------
+# LAYER 1: UNIT TESTS -- Phase 5: approval_gate.py
+# ---------------------------------------------------------------------------
+
+def test_unit_snapshot_writes_correctly():
+    """
+    [POSITIVE] write_snapshot() must create a valid JSON file containing
+    path, size, md5, and timestamp for each affected file.
+    """
+    proposals = [
+        {"action_type": "delete_duplicate",
+         "target_path": "sample_data/original_notes.txt", "reason": "test"},
+    ]
+    tf = _temp_state_file()
+    approval_gate.SNAPSHOT_FILE = tf
+    try:
+        result = write_snapshot(proposals)
+        assert result is True
+        saved = json.loads(tf.read_text())
+        assert "snapshot_timestamp_utc" in saved
+        assert saved["files_affected"] == 1
+        assert len(saved["files"]) == 1
+        entry = saved["files"][0]
+        assert entry["exists"] is True
+        assert "size_bytes" in entry
+        assert "md5" in entry
+        assert "modified_utc" in entry
+    finally:
+        if tf.exists(): tf.unlink()
+        approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+    print("PASS: write_snapshot() creates correct JSON with file metadata")
+
+
+def test_unit_snapshot_blocked_on_write_failure():
+    """
+    [NEGATIVE / RISK 1] write_snapshot() must return False when the
+    snapshot file cannot be written -- the 'no snapshot, no actions'
+    precondition.
+    """
+    proposals = [{"action_type": "delete_duplicate",
+                  "target_path": "sample_data/original_notes.txt", "reason": "test"}]
+    approval_gate.SNAPSHOT_FILE = Path("/nonexistent_dir_xyz/snapshot.json")
+    try:
+        result = write_snapshot(proposals)
+        assert result is False, "Should return False when write fails"
+    finally:
+        approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+    print("PASS: write_snapshot() returns False when file cannot be written")
+
+
+def test_unit_run_approval_gate_blocked_when_snapshot_fails():
+    """
+    [NEGATIVE / RISK 1] run_approval_gate() must return status='blocked'
+    and execute zero actions when the snapshot write fails.
+    """
+    proposals = [{"action_type": "delete_duplicate",
+                  "target_path": "sample_data/original_notes.txt",
+                  "reason": "test", "details": {}}]
+    approval_gate.SNAPSHOT_FILE = Path("/nonexistent_dir_xyz/snapshot.json")
+    try:
+        result = run_approval_gate(proposals)
+        assert result["status"] == "blocked"
+        assert result["succeeded"] == 0
+        assert result["failed"] == 0
+    finally:
+        approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+    print("PASS: run_approval_gate() blocks execution when snapshot fails")
+
+
+def test_unit_prompt_approval_invalid_input_reprompts():
+    """
+    [NEGATIVE / RISK 2] _prompt_approval() must re-prompt on invalid
+    input without crashing. Tests that arbitrary strings, empty input,
+    and non-y/n values are all rejected.
+    """
+    from approval_gate import _prompt_approval
+    proposal = {"action_type": "delete_duplicate",
+                "target_path": "some/file.txt", "reason": "test"}
+    inputs = iter(["maybe", "", "x", "DELETE", "y"])
+    with patch("builtins.input", side_effect=inputs):
+        result = _prompt_approval(proposal, 1, 1)
+    assert result is True
+    print("PASS: _prompt_approval() re-prompts on invalid input, accepts y")
+
+
+def test_unit_prompt_approval_accepts_no():
+    """
+    [POSITIVE] _prompt_approval() must return False when user enters n.
+    """
+    from approval_gate import _prompt_approval
+    proposal = {"action_type": "delete_duplicate",
+                "target_path": "some/file.txt", "reason": "test"}
+    with patch("builtins.input", return_value="n"):
+        result = _prompt_approval(proposal, 1, 1)
+    assert result is False
+    print("PASS: _prompt_approval() returns False for n")
+
+
+def test_unit_execute_delete_missing_file():
+    """
+    [NEGATIVE / RISK 3] _execute_delete() must handle FileNotFoundError
+    gracefully -- return False, not raise.
+    """
+    from approval_gate import _execute_delete
+    result = _execute_delete("/nonexistent/file/xyz.txt")
+    assert result is False
+    print("PASS: _execute_delete() returns False for missing file without raising")
+
+
+def test_unit_execute_approved_actions_continues_after_failure():
+    """
+    [NEGATIVE / RISK 3] execute_approved_actions() must continue with
+    remaining actions after a single action failure -- a failure on one
+    item must not abort the rest.
+    """
+    mixed = [
+        {"action_type": "delete_duplicate",
+         "target_path": "/nonexistent/gone.txt",
+         "reason": "test", "details": {}},
+        {"action_type": "convert_format",
+         "target_path": "sample_data/old_photo.bmp",
+         "reason": "test", "details": {"suggested_extension": ".png"}},
+    ]
+    summary = execute_approved_actions(mixed)
+    assert summary["failed"] == 1, f"Expected 1 failed, got {summary['failed']}"
+    assert summary["succeeded"] == 1, f"Expected 1 succeeded, got {summary['succeeded']}"
+    print(f"PASS: execute_approved_actions() continues after failure: {summary}")
+
+
+def test_unit_execute_approved_actions_unknown_action_type():
+    """
+    [NEGATIVE] An unrecognised action_type must be skipped with a
+    warning, not crash the execution loop.
+    """
+    unknown = [
+        {"action_type": "teleport_file",
+         "target_path": "sample_data/original_notes.txt",
+         "reason": "test", "details": {}},
+    ]
+    summary = execute_approved_actions(unknown)
+    assert summary["skipped"] == 1
+    assert summary["succeeded"] == 0
+    assert summary["failed"] == 0
+    print("PASS: execute_approved_actions() skips unknown action types without crashing")
+
+
+def test_unit_run_approval_gate_empty_proposals():
+    """
+    [POSITIVE] run_approval_gate() must handle an empty proposal list
+    gracefully -- no snapshot needed, no prompts, no actions.
+    """
+    result = run_approval_gate([])
+    assert result["succeeded"] == 0
+    print("PASS: run_approval_gate() handles empty proposals cleanly")
+
+
+# ---------------------------------------------------------------------------
+# LAYER 2: INTEGRATION TESTS -- Phase 5
+# ---------------------------------------------------------------------------
+
+def test_integration_full_phase5_approve_all():
+    """
+    Integration: full Phase 1 -> Phase 5 chain with all proposals
+    approved. Verifies snapshot is written, all actions execute,
+    and the summary is correct. Uses a temp snapshot file to avoid
+    polluting the real pre_run_snapshot.json.
+    """
+    from tools import scan_folder, find_duplicates, find_convertible_files, propose_action
+
+    # First rebuild sample_data if the live test already deleted files
+    import os
+    Path("sample_data/subfolder").mkdir(parents=True, exist_ok=True)
+    Path("sample_data/subfolder/nested").mkdir(parents=True, exist_ok=True)
+    Path("sample_data/subfolder/notes_copy.txt").write_text(
+        "This is my project notes for Q1 planning."
+    )
+    Path("sample_data/subfolder/nested/another_copy.txt").write_text(
+        "This is my project notes for Q1 planning."
+    )
+
+    files      = scan_folder("sample_data", recursive=True)
+    dup_groups = find_duplicates(files)
+    convertible = find_convertible_files(files)
+    proposals  = propose_action(dup_groups, convertible)
+    assert len(proposals) > 0, "Need proposals to test the gate"
+
+    tf = _temp_state_file()
+    approval_gate.SNAPSHOT_FILE = tf
+
+    try:
+        # Approve all
+        with patch("builtins.input", return_value="y"):
+            result = run_approval_gate(proposals)
+
+        assert result["status"] == "complete"
+        assert result["succeeded"] > 0
+        assert tf.exists(), "Snapshot file should exist"
+        snapshot = json.loads(tf.read_text())
+        assert "snapshot_timestamp_utc" in snapshot
+        assert snapshot["files_affected"] == len(proposals)
+    finally:
+        if tf.exists(): tf.unlink()
+        approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+
+    print(f"PASS: Full Phase 1->5 chain with all approved: {result}")
+
+
+def test_integration_full_phase5_reject_all():
+    """
+    Integration: full chain with all proposals rejected.
+    Verifies snapshot is still written (precondition is met),
+    but zero actions execute.
+    """
+    from tools import scan_folder, find_duplicates, find_convertible_files, propose_action
+
+    # Rebuild sample_data if needed
+    Path("sample_data/subfolder").mkdir(parents=True, exist_ok=True)
+    Path("sample_data/subfolder/nested").mkdir(parents=True, exist_ok=True)
+    Path("sample_data/subfolder/notes_copy.txt").write_text(
+        "This is my project notes for Q1 planning."
+    )
+    Path("sample_data/subfolder/nested/another_copy.txt").write_text(
+        "This is my project notes for Q1 planning."
+    )
+
+    files       = scan_folder("sample_data", recursive=True)
+    dup_groups  = find_duplicates(files)
+    convertible = find_convertible_files(files)
+    proposals   = propose_action(dup_groups, convertible)
+
+    tf = _temp_state_file()
+    approval_gate.SNAPSHOT_FILE = tf
+
+    try:
+        with patch("builtins.input", return_value="n"):
+            result = run_approval_gate(proposals)
+
+        assert result["status"] == "complete"
+        assert result["succeeded"] == 0
+        assert tf.exists(), "Snapshot should still be written even when all rejected"
+    finally:
+        if tf.exists(): tf.unlink()
+        approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+
+    print(f"PASS: Full Phase 1->5 chain with all rejected: {result}")
+
+
+# ---------------------------------------------------------------------------
 # TEST RUNNER
 # ---------------------------------------------------------------------------
 
@@ -801,12 +1053,25 @@ UNIT_TESTS = [
     test_unit_alert_sendgrid_failure_content,
     test_unit_all_alerts_contain_masked_user_id,
     test_unit_send_alert_missing_sendgrid_key,
+    # Phase 5 -- approval_gate.py
+    test_unit_snapshot_writes_correctly,
+    test_unit_snapshot_blocked_on_write_failure,
+    test_unit_run_approval_gate_blocked_when_snapshot_fails,
+    test_unit_prompt_approval_invalid_input_reprompts,
+    test_unit_prompt_approval_accepts_no,
+    test_unit_execute_delete_missing_file,
+    test_unit_execute_approved_actions_continues_after_failure,
+    test_unit_execute_approved_actions_unknown_action_type,
+    test_unit_run_approval_gate_empty_proposals,
 ]
 
 INTEGRATION_TESTS = [
     test_integration_full_tool_chain_via_execute,
     test_integration_state_machine_full_cycle,
     test_integration_error_path_returns_error_dict_not_raises,
+    # Phase 5
+    test_integration_full_phase5_approve_all,
+    test_integration_full_phase5_reject_all,
 ]
 
 
@@ -830,7 +1095,7 @@ def _run_layer(label, tests):
 
 def run_all_tests():
     print("#" * 60)
-    print("# PRE-PHASE-5 QUALITY GATE")
+    print("# PRE-PHASE-5 QUALITY GATE + PHASE 5 APPROVAL GATE TESTS")
     print("# test_phase3_4_45.py")
     print(f"# {len(UNIT_TESTS)} unit tests + {len(INTEGRATION_TESTS)} integration tests")
     print("#" * 60)

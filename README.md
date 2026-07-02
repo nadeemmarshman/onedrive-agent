@@ -35,7 +35,7 @@ and Claude Cowork:
 | 2 | JSON-schema tool contracts for each function (the same format used by MCP and the Anthropic API) |
 | 3 | The decision loop itself, built against the Anthropic API |
 | 4 | Running the loop end-to-end against a real/sample folder |
-| 5 | A human-approval gate before any destructive action executes |
+| 5 | A human-approval gate before any destructive action executes — with a pre-run manifest snapshot as a governance precondition |
 | 6 | Polish: documentation, architecture diagram, full README |
 | 7 | A written comparison against Claude Cowork (Anthropic's own production agent), once the hand-built version is complete |
 
@@ -74,7 +74,16 @@ and Claude Cowork:
   file, invalid state transitions, API failure branches, masked credential
   handling, alert message content verification, and the AWAITING_HUMAN_APPROVAL
   safety guarantee under resume)
-- ⏳ Phase 5 next — human-approval gate before any destructive action executes
+- ✅ Phase 5 complete: `approval_gate.py` — human-approval gate before
+  any destructive action executes. Presents the full proposal list for
+  review, then collects individual approve/reject decisions per item.
+  Rejected actions are skipped; the remaining approved actions still
+  execute. A pre-run manifest snapshot (`pre_run_snapshot.json`) is
+  written before any action executes — "no snapshot, no actions" is a
+  deliberate governance precondition, not an optional extra. Proven in
+  a live run: invalid input caught and re-prompted, real file deleted
+  on approval, rejected action correctly skipped, convert stub logged.
+- ⏳ Phase 6 next — polish, full README, architecture diagram, resume bullet
 
 ## Project location and key paths
 
@@ -144,9 +153,15 @@ and building for those on purpose.
   incident-management framework with graduated urgency and masked user
   credentials); explicit state machine with state persisted to disk for
   restart-and-resume after abrupt interruption (e.g. load shedding)
-- `test_phase3_4_45.py` — pre-Phase-5 quality gate test suite: 34 tests
-  (31 unit + 3 integration) covering Phases 3, 4, and 4.5, with explicit
+- `approval_gate.py` — Phase 5 human-approval gate: writes a pre-run
+  manifest snapshot before any action executes, presents the full
+  proposal list for review, collects per-item approve/reject decisions,
+  and executes only the approved actions
+- `test_phase3_4_45.py` — test suite covering Phases 3, 4, 4.5, and 5:
+  45 tests (40 unit + 5 integration), all passing, with explicit
   negative/red-line cases for every failure boundary
+- `test_phase5_live.py` — end-to-end live test runner for the approval
+  gate, wiring Phases 1–5 together against the sample folder
 - `sample_data/` — disposable test folder used to validate the functions
   safely, before any work happens against a real OneDrive folder
 - `BACKLOG.md` — Agile/Scrum-style Product Backlog and Daily Scrum log,
