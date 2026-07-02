@@ -1,202 +1,234 @@
-# OneDrive Cleanup Agent (work in progress)
+# OneDrive Cleanup Agent
 
 A small, hand-built AI agent that finds duplicate and bloated files in a
-folder (using OneDrive as the live use case), proposes clean-up actions,
-and — once complete — will execute them only after human approval.
+OneDrive folder, proposes clean-up actions, and executes them — but only
+after explicit human approval of each action.
 
-**Status: in progress.** This repo is being built incrementally, phase by
-phase, with each phase committed separately so the build process itself
-is visible in the commit history. A full README (problem, approach,
-architecture, outcome) will replace this placeholder once the build is
-complete.
+Built from scratch in Python against the Anthropic API to demonstrate the
+core agent loop (tool definition → LLM decision → action → observation)
+and the BA/PM discipline applied to a technical build: requirements, design,
+risk management, governance, and iterative delivery.
+
+**The repo is a portfolio artefact, not a finished product.** The build
+process itself is the point — each phase is committed separately so the
+decision-making behind it is visible, not just the outcome.
+
+---
 
 ## Why this project
 
-I'm a hybrid Business Analyst / IT Project Manager, not a software
-engineer by background. This project exists to give me a real,
-hands-on technical artifact to point to — built with the same
-requirements → design → build → risk/governance discipline I'd bring
-to any BA/PM deliverable, applied here to a small AI agent instead of
-a business process.
+I'm a hybrid Business Analyst / IT Project Manager, not a software engineer
+by background. This project exists to give me a concrete technical artefact
+to point to — built with the same requirements → design → build →
+risk/governance discipline I'd bring to any BA/PM deliverable.
 
-The agent automates a genuinely useful task (deduplicating and
-optimizing files in a cluttered OneDrive folder), but the real goal is
-to understand — and be able to demonstrate understanding of — the
-core agent loop that underlies tools like Claude Code, MCP connectors,
-and Claude Cowork:
+Many BA/PM candidates can talk about AI conceptually. Few can point to
+something they actually built. Fewer still apply formal PM artefacts
+(RAID log, Agile backlog, decision log, two-layer test suite) to the build
+process itself.
 
-**tool definition → decision (LLM) → action → observation → repeat**
+The agent automates a genuinely useful task (deduplicating a cluttered
+OneDrive folder), but the real goal is to understand — and be able to
+demonstrate — the core loop that underlies tools like Claude Code, MCP
+connectors, and Cowork:
 
-## Build plan
+**tool definition → LLM decision → action → observation → repeat**
 
-| Phase | What it covers |
-|---|---|
-| 1 | Plain Python tool functions (no AI) — scanning, duplicate detection, format-conversion candidates, proposed actions |
-| 2 | JSON-schema tool contracts for each function (the same format used by MCP and the Anthropic API) |
-| 3 | The decision loop itself, built against the Anthropic API |
-| 4 | Running the loop end-to-end against a real/sample folder |
-| 5 | A human-approval gate before any destructive action executes — with a pre-run manifest snapshot as a governance precondition |
-| 6 | Polish: documentation, architecture diagram, full README |
-| 7 | A written comparison against Claude Cowork (Anthropic's own production agent), once the hand-built version is complete |
+---
 
-## Current state
+## Architecture
 
-- ✅ Phase 1 complete: `tools.py` — `scan_folder()`, `find_duplicates()`,
-  `find_convertible_files()`, `propose_action()`, tested against a sample
-  folder with deliberately planted edge cases (true duplicates, a
-  same-name/different-content near-miss, and a convertible file format)
-- ✅ Phase 2 complete: `tool_contracts.py` — JSON-schema tool contracts
-  for all four functions, validated by a two-layer test suite
-- ✅ Phase 3 complete: `decision_loop.py` — first live call to the
-  Anthropic API; Claude correctly read the tool contracts and chose to
-  call `find_duplicates` and `find_convertible_files` in the same turn,
-  having recognized the two checks are independent of each other
-- ✅ Phase 4 complete: `agent_loop.py` — the full decide → execute →
-  observe → repeat loop, run successfully end-to-end against the live
-  API. In a real run: Claude called two tools in parallel in iteration
-  1 (both genuinely executed), independently chained their results into
-  a third tool call in iteration 2, then correctly recognized the goal
-  was complete and stopped on its own in iteration 3 — the natural
-  termination path, not the safety-limit fallback. No files were
-  modified or deleted; the agent's own summary correctly stated that
-  human approval (Phase 5) is required before any action is carried out
-- ✅ Phase 4.5 complete: `resilience.py` — email alerting via SendGrid
-  with 7 named alert functions structured around a 5W incident-management
-  framework (What/When/Where/Triggered by/Why/Steps), and an explicit
-  state machine (SCANNING → AWAITING_DECISION → EXECUTING_TOOL →
-  AWAITING_HUMAN_APPROVAL → DONE) persisted to disk at each transition,
-  enabling restart-and-resume after an abrupt stop (e.g. load shedding).
-  The AWAITING_HUMAN_APPROVAL state carries a safety guarantee: resume
-  logic never silently skips past it.
-- ✅ Pre-Phase-5 quality gate complete: `test_phase3_4_45.py` — 31 unit
-  tests + 3 integration tests (34 total, all passing), covering explicit
-  negative/red-line scenarios for Phases 3, 4, and 4.5 (corrupted state
-  file, invalid state transitions, API failure branches, masked credential
-  handling, alert message content verification, and the AWAITING_HUMAN_APPROVAL
-  safety guarantee under resume)
-- ✅ Phase 5 complete: `approval_gate.py` — human-approval gate before
-  any destructive action executes. Presents the full proposal list for
-  review, then collects individual approve/reject decisions per item.
-  Rejected actions are skipped; the remaining approved actions still
-  execute. A pre-run manifest snapshot (`pre_run_snapshot.json`) is
-  written before any action executes — "no snapshot, no actions" is a
-  deliberate governance precondition, not an optional extra. Proven in
-  a live run: invalid input caught and re-prompted, real file deleted
-  on approval, rejected action correctly skipped, convert stub logged.
-- ⏳ Phase 6 next — polish, full README, architecture diagram, resume bullet
+The agent runs in phases, each building on the last:
+
+```
+[Scan folder]
+     │
+     ▼
+[Claude reads tool contracts → decides which tools to call]
+     │
+     ├──▶ find_duplicates()      ─┐
+     ├──▶ find_convertible_files() ┼──▶ [propose_action()]
+     └──▶ (loop back if needed)  ─┘
+                │
+                ▼
+     [Full proposal list shown to user]
+                │
+                ▼
+     ┌─────────────────────────┐
+     │   HUMAN APPROVAL GATE   │  ◀── pre-run snapshot written first
+     │  approve / reject each  │      ("no snapshot, no actions")
+     └─────────────────────────┘
+          │             │
+       approved       rejected
+          │             │
+     [Execute]      [Skip · continue]
+          │             │
+          └──────┬──────┘
+                 ▼
+              [Done]
+
+Supporting layer (Phase 4.5):
+  State machine   — persisted to disk at each step for restart-and-resume
+  SendGrid alerts — 5W incident framework, masked user ID, per-error
+                    troubleshooting steps
+```
+
+**User roles:** single-user model — the person running the agent is also
+the approver. A multi-role model (separate operator and approver,
+role-based alert routing) is a logged future consideration, not an
+unconsidered gap (see BACKLOG.md item #5).
+
+---
 
 ## Project location and key paths
 
-These paths are referenced in automated alert emails — check here
-first if an alert tells you to "see README.md for the correct path."
+Alert emails reference this table — check here first if an alert tells
+you to "see README.md for the correct path."
 
 | Item | Default location |
 |---|---|
-| Project folder (code) | `C:\Dev\onedrive-agent\` |
-| Agent script to run | `python agent_loop.py` (run from the project folder) |
-| State file (resume/restart) | `agent_state.json` in the project folder |
+| Project folder | `C:\Dev\onedrive-agent\` |
+| Run the agent | `python agent_loop.py` (from the project folder) |
+| State file | `agent_state.json` in the project folder |
+| Pre-run snapshot | `pre_run_snapshot.json` in the project folder |
 | Run logs | `logs\` subfolder inside the project folder |
 | Environment variables | Windows User-level — set via PowerShell, persist across sessions |
 
-If you have moved the project to a different folder, update this
-table so the alert instructions remain accurate.
+If you move the project, update this table so alert instructions stay accurate.
+
+---
+
+## Build plan
+
+| Phase | What it covers | Status |
+|---|---|---|
+| 1 | Plain Python tool functions — scanning, duplicate detection, format-conversion candidates, proposed actions | ✅ Complete |
+| 2 | JSON-schema tool contracts for each function (the format used by MCP and the Anthropic API) | ✅ Complete |
+| 3 | The decision loop — live Anthropic API call; Claude reads contracts and returns structured tool calls | ✅ Complete |
+| 4 | Full execution loop — decide, execute, observe, repeat; all 5 proactive-design risks handled explicitly | ✅ Complete |
+| 4.5 | Resilience & Alerting — SendGrid email alerts (5W incident framework), state machine with restart-and-resume for load-shedding resilience | ✅ Complete |
+| 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
+| 6 | Polish — full README, architecture diagram, repo public, resume bullet | ⏳ In progress |
+| 7 | Comparison against Claude Cowork (Anthropic's own production agent) — evaluate the hand-built version against a finished product | Planned |
+
+---
 
 ## Design philosophy: proactive design, not lucky edge-case handling
 
-A recurring risk in agent-style code is writing something that happens
-to work because of how a loop or data structure is shaped, without
-having deliberately decided to handle that scenario. This project
-draws an explicit line between two categories:
+A recurring risk in agent-style code is writing something that happens to
+work because of how a loop or data structure is shaped — without having
+deliberately decided to handle that scenario.
 
-- **Things that will reliably occur**, given how an LLM-driven agent
-  behaves (e.g. the model returning zero, one, or several tool calls
-  in a single turn; malformed or unexpected tool arguments; an
-  unrecognized tool name; a loop that needs an explicit stopping
-  condition; real API/network failures) — these are designed for
-  deliberately, with a stated reason, before they cause a problem.
-- **Things that are rare or out of scope** for what this project is
-  trying to demonstrate — these are explicitly *not* engineered for,
-  on purpose, rather than left as an unconsidered gap. Out of scope,
-  and why:
-  - **Extremely large folders (thousands of files)** — sample-data
-    scale is sufficient for a portfolio demo; real performance tuning
-    isn't the point of this project.
-  - **Multi-user/concurrent access to the same folder** — not
-    relevant; this is a single-user local tool.
-  - **Internationalization/unicode filename edge cases** beyond
-    whatever Python's `pathlib` already handles natively — not a
-    focus area for this build.
+This project draws an explicit line between two categories:
 
-This distinction itself is meant to be a visible signal: the goal
-isn't defending against every conceivable input, it's recognizing
+**Things that will reliably occur**, given how an LLM-driven agent
+behaves — e.g. the model returning zero, one, or several tool calls in
+a single turn; malformed tool arguments; an unrecognised tool name; a
+loop that needs an explicit stopping condition; real API/network failures
+— are designed for deliberately, with a stated reason, before they cause
+a problem.
+
+**Things that are rare or out of scope** for what this project
+demonstrates are explicitly *not* engineered for, on purpose:
+- Extremely large folders (thousands of files) — sample-data scale is
+  sufficient for a portfolio demo
+- Multi-user/concurrent access — not relevant; this is a single-user tool
+- Internationalization/unicode edge cases beyond what `pathlib` handles
+
+This distinction itself is meant to be visible: the goal is recognising
 which risks are real for an LLM-driven tool-calling loop specifically,
 and building for those on purpose.
 
-## Repo contents (so far)
+---
 
-- `tools.py` — Phase 1 tool functions
-- `tool_contracts.py` — Phase 2 JSON-schema tool contracts (the format
-  used by MCP and the Anthropic API to describe each function to an LLM)
-- `test_phase2.py` — Phase 2 test suite (see Testing approach below)
-- `decision_loop.py` — Phase 3 decision loop, calling the live Anthropic
-  API with the tool contracts; includes error handling for API/network
-  failures
-- `agent_loop.py` — Phase 4 full execution loop (decide → execute →
-  observe → repeat), built on top of `decision_loop.py`'s API client.
-  Actually runs the tools Claude decides to call and feeds real results
-  back as observations, looping until the goal is complete or a safety
-  limit is reached. Implements explicit handling for zero/multiple tool
-  calls per turn, malformed arguments, unrecognized tool names, and loop
-  termination (see Design philosophy below)
-- `resilience.py` — Phase 4.5 resilience and alerting: email alerts via
-  SendGrid (7 named alert functions, each structured around a 5W
-  incident-management framework with graduated urgency and masked user
-  credentials); explicit state machine with state persisted to disk for
-  restart-and-resume after abrupt interruption (e.g. load shedding)
-- `approval_gate.py` — Phase 5 human-approval gate: writes a pre-run
-  manifest snapshot before any action executes, presents the full
-  proposal list for review, collects per-item approve/reject decisions,
-  and executes only the approved actions
-- `test_phase3_4_45.py` — test suite covering Phases 3, 4, 4.5, and 5:
-  45 tests (40 unit + 5 integration), all passing, with explicit
-  negative/red-line cases for every failure boundary
-- `test_phase5_live.py` — end-to-end live test runner for the approval
-  gate, wiring Phases 1–5 together against the sample folder
-- `sample_data/` — disposable test folder used to validate the functions
-  safely, before any work happens against a real OneDrive folder
-- `BACKLOG.md` — Agile/Scrum-style Product Backlog and Daily Scrum log,
-  tracked as part of the portfolio of evidence (see file for methodology
-  notes)
-- `RAID_LOG.md` / `RAID_Log.xlsx` — Risks, Assumptions, Issues, and
-  Dependencies log; a standard PM control artifact tracking project risk
-  separately from day-to-day Scrum delivery tracking
-- `build_raid_log.py` — the script used to generate `RAID_Log.xlsx`,
-  included for transparency/reproducibility rather than hand-building the
-  spreadsheet
+## Governance and risk management
+
+This project applies BA/PM discipline to a technical build — not just to
+the code, but to the process itself:
+
+- **RAID_LOG.md / RAID_Log.xlsx** — Risks, Assumptions, Issues, and
+  Dependencies tracked throughout the build (6 risks, 5 assumptions,
+  4 issues, 4 dependencies at time of writing)
+- **BACKLOG.md** — Agile Product Backlog and Daily Scrum log, including
+  retrospective notes on what went wrong and what process changes resulted
+- **Decision log** (in the handoff document) — every design trade-off
+  recorded with options considered, key trade-off, and choice made
+- **Pre-run manifest snapshot** — `pre_run_snapshot.json` written before
+  any destructive action executes, recording each affected file's path,
+  size, and MD5 hash as an audit trail. "No snapshot, no actions" is a
+  hard precondition, not an optional extra
+- **DR/rollback** — OneDrive's built-in recycle bin and version history
+  accepted as the primary recovery mechanism (proportionate); the manifest
+  snapshot provides agent-level audit without redundant file copying
+
+---
 
 ## Testing approach
 
-Every phase that introduces new functions is tested in two ordered
-layers, growing in scope as the project does:
+Every phase that introduces new functions is tested in two ordered layers:
 
-1. **Unit tests** — each function tested in isolation, including edge
-   cases (empty input, missing folders, near-miss false positives, etc.).
-   These run first and must all pass before integration tests are
-   considered meaningful.
+1. **Unit tests** — each function tested in isolation, including realistic
+   negative/red-line cases (empty input, missing folders, near-miss false
+   positives, corrupted state files, invalid API keys, disk write failures)
 2. **Integration tests** — functions tested chained together, with data
-   flowing from one into the next exactly as it will in the real agent
-   loop. This is where contract-shape mismatches and "forgot to handle
-   the previous step's output" bugs would surface.
+   flowing as it will in the real agent loop
 
-This two-layer structure repeats and expands with each new phase (e.g.
-Phase 3's decision loop gets its own unit tests, then an integration
-test layered on top of the existing chain) rather than being replaced.
+The test suite scales with the project: `test_phase2.py` covers Phases 1–2;
+`test_phase3_4_45.py` covers Phases 3–5 (45 tests: 40 unit + 5 integration,
+all passing). Unit tests run first; if any fail, integration tests are
+skipped and flagged as not meaningful until the unit layer is clean.
 
-## Notes
+---
 
-- No destructive action (delete, convert, move) happens without an
-  explicit human approval step — that gate is being built in Phase 5,
-  and nothing before it touches real files.
-- Build/design decisions with real trade-offs (architecture, risk,
-  scope) are logged with their reasoning as the project progresses;
-  this will be summarized in the final README.
+## Current state
+
+- ✅ Phase 1 complete: `tools.py` — four tool functions, tested against a
+  sample folder with deliberately planted edge cases (true duplicates, a
+  same-name/different-content near-miss, a convertible file format)
+- ✅ Phase 2 complete: `tool_contracts.py` — JSON-schema tool contracts
+  for all four functions, validated by a two-layer test suite
+- ✅ Phase 3 complete: `decision_loop.py` — first live Anthropic API call;
+  Claude correctly identified and called two independent tools in the same
+  turn, without being told to
+- ✅ Phase 4 complete: `agent_loop.py` — full loop run end-to-end; Claude
+  called two tools in parallel in iteration 1, chained their results into a
+  third call in iteration 2, then correctly stopped on its own in iteration
+  3 (natural termination, not the safety-limit fallback)
+- ✅ Phase 4.5 complete: `resilience.py` — SendGrid alerting (7 named alert
+  functions, 5W incident framework, masked user credentials, README-reference
+  pattern on all commands) and explicit state machine (5 named states,
+  persisted to disk, `AWAITING_HUMAN_APPROVAL` never silently skipped)
+- ✅ Phase 5 complete: `approval_gate.py` — proven in a live run: invalid
+  input caught and re-prompted, real file deleted on approval, rejected
+  action correctly skipped, pre-run snapshot verified with matching MD5 hashes
+- ⏳ Phase 6 in progress
+
+---
+
+## Repo contents
+
+- `tools.py` — Phase 1 tool functions
+- `tool_contracts.py` — Phase 2 JSON-schema tool contracts
+- `test_phase2.py` — Phase 2 two-layer test suite
+- `decision_loop.py` — Phase 3 decision loop (live Anthropic API)
+- `agent_loop.py` — Phase 4 full execution loop with structured logging
+- `resilience.py` — Phase 4.5 resilience and alerting
+- `approval_gate.py` — Phase 5 human-approval gate
+- `test_phase3_4_45.py` — Phase 3–5 test suite (45 tests)
+- `test_phase5_live.py` — end-to-end live test runner (Phases 1–5)
+- `sample_data/` — disposable test folder with planted edge cases
+- `BACKLOG.md` — Agile Product Backlog and Daily Scrum log
+- `RAID_LOG.md` / `RAID_Log.xlsx` — Risks, Assumptions, Issues, Dependencies
+- `build_raid_log.py` — script that generated `RAID_Log.xlsx`
+
+---
+
+## Running the agent
+
+```
+cd C:\Dev\onedrive-agent
+python agent_loop.py
+```
+
+Requires `ANTHROPIC_API_KEY` and `SENDGRID_API_KEY` set as Windows
+User-level environment variables (see README table above for setup).
