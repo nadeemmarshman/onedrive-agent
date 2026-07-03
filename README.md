@@ -111,7 +111,41 @@ If you move the project, update this table so alert instructions stay accurate.
 | 4.5 | Resilience & Alerting — SendGrid email alerts (5W incident framework), state machine with restart-and-resume for load-shedding resilience | ✅ Complete |
 | 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
 | 6 | Polish — full README, architecture diagram, repo public | ✅ Complete |
-| 7 | Comparison against Claude Cowork (Anthropic's own production agent) — evaluate the hand-built version against a finished product | Planned |
+| 7 | Comparison against Claude Cowork (Anthropic's own production agent) — evaluate the hand-built version against a finished product | ✅ Complete |
+| 8 | UAT / Pilot — validate the agent against a real, limited subset of live OneDrive data before full production rollout | 🔜 Planned |
+
+---
+
+## This project mapped to standard SDLC terminology
+
+Applied retrospectively, for readers more familiar with formal SDLC
+framing than with this project's own phase numbering:
+
+| SDLC Phase | Maps to (this project) | Key artefacts |
+|---|---|---|
+| Planning | Phase 0 (setup, scope) | Handoff document v1.0 |
+| Requirements & Analysis | Phase 1 | `tools.py`, Decision log entries |
+| Design | Phase 2 | `tool_contracts.py` (interface/technical design) |
+| Development | Phases 3, 4, 4.5, 5 | `decision_loop.py`, `agent_loop.py`, `resilience.py`, `approval_gate.py` |
+| Testing / QA | Pre-Phase-5 gate, `test_phase2.py`, `test_phase3_4_45.py`, Phase 7 (Cowork as independent validation) | Test suites, `REMEDIATION_2026-07-02_cowork-peer-review.md` |
+| **UAT / Pilot** | **Phase 8 (planned)** | Validation against a real, limited OneDrive subset before full rollout |
+| Deployment | Full OneDrive rollout (future) | — |
+| Maintenance | Ongoing | `BACKLOG.md`, `RAID_LOG.md` |
+
+**Honest note on fit:** Phase 6 (polish, documentation, public repo) and
+Phase 7 (Cowork comparison) don't map cleanly onto a single classic SDLC
+phase — Phase 6 sits closer to release/documentation preparation, and
+Phase 7 functions as an additional, independent testing/validation step
+rather than a distinct lifecycle stage. Noted here honestly rather than
+forcing a clean fit that isn't quite accurate.
+
+**Terminology note:** this stage is deliberately labelled **UAT/Pilot**,
+not "Proof of Concept (POC)." A POC proves a concept is technically
+feasible, typically done early on synthetic or minimal data — that was
+effectively already covered by Phases 1–4 against `sample_data/`. UAT/Pilot
+validates an already-built, already-tested solution against real data and
+conditions immediately before full production rollout, which is what this
+stage is for.
 
 ---
 
@@ -149,8 +183,8 @@ This project applies BA/PM discipline to a technical build — not just to
 the code, but to the process itself:
 
 - **RAID_LOG.md / RAID_Log.xlsx** — Risks, Assumptions, Issues, and
-  Dependencies tracked throughout the build (6 risks, 5 assumptions,
-  4 issues, 4 dependencies at time of writing)
+  Dependencies tracked throughout the build (6 risks, 6 assumptions,
+  5 issues, 4 dependencies at time of writing)
 - **BACKLOG.md** — Agile Product Backlog and Daily Scrum log, including
   retrospective notes on what went wrong and what process changes resulted
 - **Decision log** (in the handoff document) — every design trade-off
@@ -180,6 +214,20 @@ The test suite scales with the project: `test_phase2.py` covers Phases 1–2;
 all passing). Unit tests run first; if any fail, integration tests are
 skipped and flagged as not meaningful until the unit layer is clean.
 
+**Independent peer review (2026-07-02):** as an additional check beyond
+this project's own test suite, Claude Cowork was asked to independently
+review every project file for syntax validity, internal consistency, and
+README clarity — without being told what to look for beyond that. Cowork
+found and correctly diagnosed a real, previously-unnoticed test isolation
+bug: two Phase 5 integration tests were operating on the real `sample_data/`
+fixture folder rather than an isolated copy, causing genuine file deletions
+on every test run and silent fixture drift. It verified this by actually
+running the test suite, not just reading the code, and separately fact-checked
+the Phase 7 model comparison claims against live search. All findings were
+confirmed accurate and have been fixed (see RAID_LOG.md, Issue I5). This is
+itself a small demonstration of the project's own philosophy — verify rather
+than assume, and catch problems before they compound.
+
 ---
 
 ## Current state
@@ -205,7 +253,14 @@ skipped and flagged as not meaningful until the unit layer is clean.
   action correctly skipped, pre-run snapshot verified with matching MD5 hashes
 - ✅ Phase 6 complete: full README, architecture diagram (`architecture.svg`
   rendering inline on the repo landing page), repo switched to Public
-- 🔜 Phase 7 planned — comparison against Claude Cowork
+- ✅ Phase 7 complete — see Comparison against Claude Cowork below
+- 🔍 **Independent peer review (2026-07-02):** Claude Cowork reviewed all
+  project files; found and correctly diagnosed a real test isolation bug
+  plus three minor documentation drifts. All fixed and verified same day.
+  Full account in `REMEDIATION_2026-07-02_cowork-peer-review.md`. Agent's
+  own model also switched from `claude-sonnet-4-6` to `claude-sonnet-5`
+  to align with Claude Chat/Cowork (see handoff document Decision log).
+- 🔜 Phase 8 planned — UAT/Pilot against a real, limited OneDrive subset
 
 ---
 
@@ -224,6 +279,9 @@ skipped and flagged as not meaningful until the unit layer is clean.
 - `BACKLOG.md` — Agile Product Backlog and Daily Scrum log
 - `RAID_LOG.md` / `RAID_Log.xlsx` — Risks, Assumptions, Issues, Dependencies
 - `build_raid_log.py` — script that generated `RAID_Log.xlsx`
+- `REMEDIATION_2026-07-02_cowork-peer-review.md` — Root Cause Analysis
+  and remediation report for findings from an independent Claude Cowork
+  peer review (see RAID_LOG.md, Issue I5)
 
 ---
 
@@ -236,3 +294,97 @@ python agent_loop.py
 
 Requires `ANTHROPIC_API_KEY` and `SENDGRID_API_KEY` set as Windows
 User-level environment variables (see README table above for setup).
+
+---
+
+## Comparison against Claude Cowork
+
+**What this is:** After building the agent by hand, the same file-organisation
+task was given to Claude Cowork — Anthropic's own production-grade agentic
+tool — on the same controlled test data (`sample_data/`). The goal: evaluate
+how the hand-built version compares to a finished product built on the same
+underlying loop, and identify what each does that the other doesn't.
+
+**Models used:**
+- Hand-built agent (Phases 3–5, as originally built and tested): `claude-sonnet-4-6`
+  (released February 2026) — chosen at the time because it was accessible on
+  the free tier during an early, budget-constrained phase of this project
+- Claude Cowork (Phase 7): `claude-sonnet-5` (released June 30, 2026 — the
+  day before this comparison was run)
+- **Post-comparison update:** once this project demonstrated enough value to
+  justify a paid Claude subscription, and the Phase 7 comparison surfaced a
+  model-version mismatch between the agent's API calls and Claude Chat/Cowork
+  (both already on Sonnet 5), the agent's model string was switched to
+  `claude-sonnet-5` in `decision_loop.py` and `agent_loop.py`. All three
+  surfaces — Claude Chat, Claude Cowork, and this agent's own API calls —
+  are now aligned on Sonnet 5. See handoff document Decision log (item 7)
+  for the full trade-off record.
+- **Key capability difference (Sonnet 4.6 → Sonnet 5):** Sonnet 5 is a direct
+  upgrade over Sonnet 4.6, with its largest gains in agentic tasks and coding
+  (+5.1 points on SWE-bench Pro: 63.2% vs 58.1%); both models share the same
+  1M token context window and tool-use architecture, so the core agent loop
+  mechanics are comparable — the difference is in reasoning depth and
+  reliability on complex tasks, not in the fundamental approach.
+
+**Task given to Cowork** (verbatim):
+> "I have a folder at C:\Dev\onedrive-agent\sample_data that contains some
+> files. Please scan it, identify any duplicate files and any files in old
+> or bloated formats that could be converted to better alternatives, and
+> propose what actions you'd take. Don't do anything yet — just show me
+> your findings and proposed actions first."
+
+### What Cowork found
+
+Cowork correctly identified:
+- `original_notes.txt` and `subfolder/nested/another_copy.txt` as
+  byte-for-byte identical (same MD5) — one redundant
+- `original_notes_v2.txt` as a near-miss — similar name, but different
+  content (Q1 vs Q2 planning notes) — correctly excluded as a non-duplicate
+- `old_photo.bmp` as a conversion candidate (BMP → PNG or JPEG)
+- `resume_draft.docx` as already modern — no action needed
+
+Cowork also added one recommendation outside the defined task scope:
+rename `original_notes_v2.txt` to something clearer (e.g.
+`original_notes_q2.txt`) to avoid confusion with a versioned copy.
+
+### Comparison
+
+| Dimension | Hand-built agent | Claude Cowork |
+|---|---|---|
+| Model | `claude-sonnet-4-6` | `claude-sonnet-5` (Sonnet 5, released 2026-06-30) |
+| Duplicate detection | MD5 content hash via Python | MD5 content hash via file inspection |
+| Near-miss handling | Correctly excluded | Correctly excluded |
+| Proposal format | Structured JSON (`propose_action()`) | Natural language list |
+| Approval gate | Explicit per-item y/n prompt with pre-run manifest snapshot | Permission prompt on deletion |
+| Audit trail | `pre_run_snapshot.json` (path, size, MD5, timestamp per affected file) | Not visible to user |
+| Structured logging | `INFO`/`WARNING`/`ERROR` to timestamped log file per run | Not visible to user |
+| Email alerting | SendGrid, 7 named alert functions, 5W incident framework | Not present |
+| State machine | Explicit 5-state machine persisted to disk — survives power outage | Not present |
+| Rename suggestions | Not in scope | Added proactively |
+| Underlying mechanics | Fully visible — tool contracts, decision loop, state transitions in code | Production black box |
+
+### What this tells us
+
+**On findings:** Cowork reached the same conclusions on every test case —
+same duplicate identified, same near-miss correctly excluded, same conversion
+candidate flagged. The core agent logic in the hand-built version is validated
+against a production tool.
+
+**On governance:** Where the hand-built version differs from Cowork is not
+in *what* it finds, but in *how it governs* what it does with those findings.
+The explicit audit trail, structured logging, email alerting on failure, and
+state-machine resilience for power outages are deliberate engineering choices
+with stated reasons — none of these are visible in Cowork's output. This
+reflects the BA/PM framing of the project: the governance layer is as
+important as the functional output.
+
+**On transparency:** Building the agent by hand makes the underlying
+mechanics inspectable. Cowork is a polished, production-capable tool;
+the hand-built version is a learning and demonstration artefact. Both
+are useful — for different purposes.
+
+**On scope:** Cowork's proactive rename suggestion shows one area where
+a production tool adds value beyond the defined task — general-purpose
+reasoning applied opportunistically. The hand-built agent only does what
+it was explicitly designed to do, which is appropriate for a controlled,
+governed pipeline but less flexible than a general-purpose agent.

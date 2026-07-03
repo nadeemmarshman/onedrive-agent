@@ -76,7 +76,7 @@ def ask_claude_to_decide(client: anthropic.Anthropic, goal: str, folder_state: l
     # dumping a raw Python stack trace.
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=1000,
             tools=TOOL_CONTRACTS,
             messages=[

@@ -250,7 +250,7 @@ def run_agent_loop(goal: str, starting_folder: str = "sample_data") -> None:
         # [RISK 5] API/network failures -- full detail in ERROR
         try:
             response = client.messages.create(
-                model="claude-sonnet-4-6",
+                model="claude-sonnet-5",
                 max_tokens=1500,
                 tools=TOOL_CONTRACTS,
                 messages=messages,

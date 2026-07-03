@@ -929,32 +929,35 @@ def test_integration_full_phase5_approve_all():
     """
     Integration: full Phase 1 -> Phase 5 chain with all proposals
     approved. Verifies snapshot is written, all actions execute,
-    and the summary is correct. Uses a temp snapshot file to avoid
-    polluting the real pre_run_snapshot.json.
+    and the summary is correct.
+
+    ISOLATION FIX (2026-07-02, caught by Claude Cowork peer review):
+    This test previously scanned and operated on the REAL sample_data/
+    folder. Since _execute_delete() is not mocked, "approve all" genuinely
+    deleted real fixture files on every test run, causing sample_data/ to
+    drift out of sync with what test_phase2.py expects (a recurring,
+    self-inflicted bug, not a one-time fluke). Fixed by building a
+    temporary copy of sample_data/ and operating entirely within it --
+    the real fixture folder is never touched by this test.
     """
+    import shutil
     from tools import scan_folder, find_duplicates, find_convertible_files, propose_action
 
-    # First rebuild sample_data if the live test already deleted files
-    import os
-    Path("sample_data/subfolder").mkdir(parents=True, exist_ok=True)
-    Path("sample_data/subfolder/nested").mkdir(parents=True, exist_ok=True)
-    Path("sample_data/subfolder/notes_copy.txt").write_text(
-        "This is my project notes for Q1 planning."
-    )
-    Path("sample_data/subfolder/nested/another_copy.txt").write_text(
-        "This is my project notes for Q1 planning."
-    )
-
-    files      = scan_folder("sample_data", recursive=True)
-    dup_groups = find_duplicates(files)
-    convertible = find_convertible_files(files)
-    proposals  = propose_action(dup_groups, convertible)
-    assert len(proposals) > 0, "Need proposals to test the gate"
+    # Build an isolated temp copy of sample_data -- never touch the real folder
+    temp_dir = Path(tempfile.mkdtemp())
+    temp_sample_data = temp_dir / "sample_data"
+    shutil.copytree("sample_data", temp_sample_data)
 
     tf = _temp_state_file()
     approval_gate.SNAPSHOT_FILE = tf
 
     try:
+        files      = scan_folder(str(temp_sample_data), recursive=True)
+        dup_groups = find_duplicates(files)
+        convertible = find_convertible_files(files)
+        proposals  = propose_action(dup_groups, convertible)
+        assert len(proposals) > 0, "Need proposals to test the gate"
+
         # Approve all
         with patch("builtins.input", return_value="y"):
             result = run_approval_gate(proposals)
@@ -968,8 +971,9 @@ def test_integration_full_phase5_approve_all():
     finally:
         if tf.exists(): tf.unlink()
         approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
-    print(f"PASS: Full Phase 1->5 chain with all approved: {result}")
+    print(f"PASS: Full Phase 1->5 chain with all approved (isolated temp copy): {result}")
 
 
 def test_integration_full_phase5_reject_all():
@@ -977,28 +981,28 @@ def test_integration_full_phase5_reject_all():
     Integration: full chain with all proposals rejected.
     Verifies snapshot is still written (precondition is met),
     but zero actions execute.
+
+    ISOLATION FIX (2026-07-02, caught by Claude Cowork peer review):
+    Same fix as test_integration_full_phase5_approve_all -- operates on
+    a temporary copy of sample_data/, never the real fixture folder.
     """
+    import shutil
     from tools import scan_folder, find_duplicates, find_convertible_files, propose_action
 
-    # Rebuild sample_data if needed
-    Path("sample_data/subfolder").mkdir(parents=True, exist_ok=True)
-    Path("sample_data/subfolder/nested").mkdir(parents=True, exist_ok=True)
-    Path("sample_data/subfolder/notes_copy.txt").write_text(
-        "This is my project notes for Q1 planning."
-    )
-    Path("sample_data/subfolder/nested/another_copy.txt").write_text(
-        "This is my project notes for Q1 planning."
-    )
-
-    files       = scan_folder("sample_data", recursive=True)
-    dup_groups  = find_duplicates(files)
-    convertible = find_convertible_files(files)
-    proposals   = propose_action(dup_groups, convertible)
+    # Build an isolated temp copy of sample_data -- never touch the real folder
+    temp_dir = Path(tempfile.mkdtemp())
+    temp_sample_data = temp_dir / "sample_data"
+    shutil.copytree("sample_data", temp_sample_data)
 
     tf = _temp_state_file()
     approval_gate.SNAPSHOT_FILE = tf
 
     try:
+        files       = scan_folder(str(temp_sample_data), recursive=True)
+        dup_groups  = find_duplicates(files)
+        convertible = find_convertible_files(files)
+        proposals   = propose_action(dup_groups, convertible)
+
         with patch("builtins.input", return_value="n"):
             result = run_approval_gate(proposals)
 
@@ -1008,8 +1012,9 @@ def test_integration_full_phase5_reject_all():
     finally:
         if tf.exists(): tf.unlink()
         approval_gate.SNAPSHOT_FILE = SNAPSHOT_FILE
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
-    print(f"PASS: Full Phase 1->5 chain with all rejected: {result}")
+    print(f"PASS: Full Phase 1->5 chain with all rejected (isolated temp copy): {result}")
 
 
 # ---------------------------------------------------------------------------

@@ -82,7 +82,7 @@ def _masked_user_id() -> str:
 
     Security note: even partial identifiers carry risk. Alert emails
     should be delivered to a secured inbox. This is logged as a known,
-    accepted risk in RAID_LOG.md (see Risk R_SEC_01).
+    accepted risk in RAID_LOG.md (see Risk R5).
     """
     def _mask(value: str) -> str:
         return (value[:2] + "****") if len(value) > 2 else "****"
