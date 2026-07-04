@@ -82,24 +82,6 @@ unconsidered gap (see BACKLOG.md item #5).
 
 ---
 
-## Project location and key paths
-
-Alert emails reference this table — check here first if an alert tells
-you to "see README.md for the correct path."
-
-| Item | Default location |
-|---|---|
-| Project folder | `C:\Dev\onedrive-agent\` |
-| Run the agent | `python agent_loop.py` (from the project folder) |
-| State file | `agent_state.json` in the project folder |
-| Pre-run snapshot | `pre_run_snapshot.json` in the project folder |
-| Run logs | `logs\` subfolder inside the project folder |
-| Environment variables | Windows User-level — set via PowerShell, persist across sessions |
-
-If you move the project, update this table so alert instructions stay accurate.
-
----
-
 ## Build plan
 
 | Phase | What it covers | Status |
@@ -283,6 +265,24 @@ than assume, and catch problems before they compound.
 - `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` — Root Cause Analysis
   and remediation report for findings from an independent Claude Cowork
   peer review (see RAID_LOG.md, Issue I5)
+
+---
+
+## Project location and key paths
+
+Alert emails reference this table — check here first if an alert tells
+you to "see README.md for the correct path."
+
+| Item | Default location |
+|---|---|
+| Project folder | `C:\Dev\onedrive-agent\` |
+| Run the agent | `python agent_loop.py` (from the project folder) |
+| State file | `agent_state.json` in the project folder |
+| Pre-run snapshot | `pre_run_snapshot.json` in the project folder |
+| Run logs | `logs\` subfolder inside the project folder |
+| Environment variables | Windows User-level — set via PowerShell, persist across sessions |
+
+If you move the project, update this table so alert instructions stay accurate.
 
 ---
 
