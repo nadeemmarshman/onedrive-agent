@@ -127,7 +127,7 @@ framing than with this project's own phase numbering:
 | Requirements & Analysis | Phase 1 | `tools.py`, Decision log entries |
 | Design | Phase 2 | `tool_contracts.py` (interface/technical design) |
 | Development | Phases 3, 4, 4.5, 5 | `decision_loop.py`, `agent_loop.py`, `resilience.py`, `approval_gate.py` |
-| Testing / QA | Pre-Phase-5 gate, `test_phase2.py`, `test_phase3_4_45.py`, Phase 7 (Cowork as independent validation) | Test suites, `REMEDIATION_2026-07-02_cowork-peer-review.md` |
+| Testing / QA | Pre-Phase-5 gate, `test_phase2.py`, `test_phase3_4_45.py`, Phase 7 (Cowork as independent validation) | Test suites, `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` |
 | **UAT / Pilot** | **Phase 8 (planned)** | Validation against a real, limited OneDrive subset before full rollout |
 | Deployment | Full OneDrive rollout (future) | — |
 | Maintenance | Ongoing | `BACKLOG.md`, `RAID_LOG.md` |
@@ -182,7 +182,7 @@ and building for those on purpose.
 This project applies BA/PM discipline to a technical build — not just to
 the code, but to the process itself:
 
-- **RAID_LOG.md / RAID_Log.xlsx** — Risks, Assumptions, Issues, and
+- **RAID_LOG.md / docs/RAID_Log.xlsx** — Risks, Assumptions, Issues, and
   Dependencies tracked throughout the build (6 risks, 6 assumptions,
   5 issues, 4 dependencies at time of writing)
 - **BACKLOG.md** — Agile Product Backlog and Daily Scrum log, including
@@ -257,7 +257,7 @@ than assume, and catch problems before they compound.
 - 🔍 **Independent peer review (2026-07-02):** Claude Cowork reviewed all
   project files; found and correctly diagnosed a real test isolation bug
   plus three minor documentation drifts. All fixed and verified same day.
-  Full account in `REMEDIATION_2026-07-02_cowork-peer-review.md`. Agent's
+  Full account in `docs/REMEDIATION_2026-07-02_cowork-peer-review.md`. Agent's
   own model also switched from `claude-sonnet-4-6` to `claude-sonnet-5`
   to align with Claude Chat/Cowork (see handoff document Decision log).
 - 🔜 Phase 8 planned — UAT/Pilot against a real, limited OneDrive subset
@@ -277,9 +277,10 @@ than assume, and catch problems before they compound.
 - `test_phase5_live.py` — end-to-end live test runner (Phases 1–5)
 - `sample_data/` — disposable test folder with planted edge cases
 - `BACKLOG.md` — Agile Product Backlog and Daily Scrum log
-- `RAID_LOG.md` / `RAID_Log.xlsx` — Risks, Assumptions, Issues, Dependencies
-- `build_raid_log.py` — script that generated `RAID_Log.xlsx`
-- `REMEDIATION_2026-07-02_cowork-peer-review.md` — Root Cause Analysis
+- `RAID_LOG.md` — Risks, Assumptions, Issues, Dependencies (markdown)
+- `docs/RAID_Log.xlsx` — Excel version of `RAID_LOG.md`
+- `build_raid_log.py` — script that generated `docs/RAID_Log.xlsx`
+- `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` — Root Cause Analysis
   and remediation report for findings from an independent Claude Cowork
   peer review (see RAID_LOG.md, Issue I5)
 
@@ -321,10 +322,11 @@ underlying loop, and identify what each does that the other doesn't.
   for the full trade-off record.
 - **Key capability difference (Sonnet 4.6 → Sonnet 5):** Sonnet 5 is a direct
   upgrade over Sonnet 4.6, with its largest gains in agentic tasks and coding
-  (+5.1 points on SWE-bench Pro: 63.2% vs 58.1%); both models share the same
-  1M token context window and tool-use architecture, so the core agent loop
-  mechanics are comparable — the difference is in reasoning depth and
-  reliability on complex tasks, not in the fundamental approach.
+  (+5.1 points on SWE-bench Pro: 63.2% vs 58.1%, [source](https://www.anthropic.com/news/claude-sonnet-5));
+  both models share the same 1M token context window and tool-use architecture,
+  so the core agent loop mechanics are comparable — the difference is in
+  reasoning depth and reliability on complex tasks, not in the fundamental
+  approach.
 
 **Task given to Cowork** (verbatim):
 > "I have a folder at C:\Dev\onedrive-agent\sample_data that contains some
