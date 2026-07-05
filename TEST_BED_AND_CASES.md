@@ -1,0 +1,277 @@
+# Test Bed & Test Cases — OneDrive Cleanup Agent
+
+**Version:** v1.0
+**Date:** 2026-07-05
+**Repo:** `github.com/nadeemmarshman/onedrive-agent`
+**Companion to:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) — this document is the hands-on construction guide for the Phase 8 UAT/Pilot test bed defined there (§5). Read `TEST_STRATEGY.md` first for the *why*; this document is the *how*.
+
+---
+
+## 1. Purpose and handover intent
+
+This is a **self-contained, reproducible recipe** for building a controlled test bed that proves the OneDrive Cleanup Agent works — as a concept and as a solution. It is deliberately written so that **anyone** (a reviewer, a new team member, an interviewer given the repo) can follow it start-to-finish and reach the same known-good result, with no reliance on the author's specific OneDrive contents.
+
+It delivers the "controlled pilot folder" approach recommended in `TEST_STRATEGY.md` §5.2: **real files in a controlled folder, with a known answer key**, so every proposed action can be checked against a documented expected outcome — the strongest form of UAT.
+
+Two ways to populate every case are given:
+- **Source (real):** copy an existing file from OneDrive or the local drive — proves behaviour on genuine data.
+- **Create (synthetic):** generate the file from a command — makes the bed fully reproducible by anyone, on any machine.
+
+All commands are **Windows PowerShell** (the project's platform: Windows, Python 3.14).
+
+---
+
+## 2. Test bed location and name
+
+| Setting | Value | Why |
+|---|---|---|
+| **Root** | `C:\` (drive root) | Specified by Nadeem (BA/PM). Top-level, obvious, and — critically — **outside both the repo and the OneDrive-synced tree**. |
+| **Folder name** | `OneDrive-Agent_TestBed` | Apt and self-describing; hyphen mirrors the repo slug convention. |
+| **Full path** | `C:\OneDrive-Agent_TestBed\` | The value to set as `starting_folder` for the pilot. |
+
+**Why outside the repo:** the repo lives at `C:\Dev\onedrive-agent\`. Putting the test bed there would make the agent scan its own codebase and risk Git churn — the same reasoning that keeps the code out of OneDrive (see handoff Decision log).
+
+**Why outside OneDrive sync — and the one nuance a reviewer should know (BA-surfaced):**
+A `C:\`-root folder is *not* under OneDrive, so:
+- ✅ No sync churn while you build/tear down the bed repeatedly.
+- ✅ Deletions still go to a recycle bin — but the **Windows** Recycle Bin, *not* OneDrive's.
+- ⚠️ RAID **R6** names *OneDrive's* recycle bin / version history as the recovery mechanism. To validate **that specific path** (test case **RB-08**), you need one run inside an actual OneDrive subfolder. This is called out explicitly rather than left as a silent gap.
+
+**Recommendation:** use `C:\OneDrive-Agent_TestBed\` for the main bed (cases GB-01…RB-07, RB-09), and build a small **secondary bed under OneDrive** only for the two OneDrive-specific cases (RB-08 recycle-bin recovery, RB-10 online-only). Both are described below.
+
+---
+
+## 3. Build the test bed — prerequisites and folder
+
+**Prerequisites**
+- Repo cloned at `C:\Dev\onedrive-agent\`, all 67 automated tests green (`test_phase2.py`, `test_phase3_4_45.py`, `test_phase8_pre_pilot.py`).
+- `ANTHROPIC_API_KEY` and `SENDGRID_API_KEY` set as environment variables.
+
+**Create the root folder and a nested subfolder** (the nested one is for the cross-folder duplicate case):
+
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\OneDrive-Agent_TestBed"
+New-Item -ItemType Directory -Force -Path "C:\OneDrive-Agent_TestBed\archive"
+Set-Location "C:\OneDrive-Agent_TestBed"
+```
+
+---
+
+## 4. Green-line test cases (agent SHOULD detect / propose correctly)
+
+Green-line = the happy path. The agent must correctly find what's there and propose the right action — but still **never act without approval**.
+
+### GB-01 — True duplicate (identical content, different name)
+*Proves:* content-hash dedup (not filename matching).
+- **Source (real):** `Copy-Item "$HOME\OneDrive\Documents\<some-file>.pdf" ".\report.pdf"; Copy-Item ".\report.pdf" ".\report_COPY.pdf"`
+- **Create (synthetic):**
+  ```powershell
+  Set-Content -Path ".\report.txt" -Value "Quarterly report body. Line two." -NoNewline
+  Copy-Item ".\report.txt" ".\report_COPY.txt"
+  ```
+*Expected:* both flagged as one duplicate group (matching MD5); delete proposed for one, keep the other. Nothing deleted before approval.
+
+### GB-02 — Duplicate group of three
+*Proves:* the "keep exactly one per group" rule at group size > 2.
+```powershell
+Copy-Item ".\report.txt" ".\report_v2.txt"   # third identical copy (after GB-01)
+```
+*Expected:* one group of three; keep 1, propose delete 2.
+
+### GB-03 — Convertible file (`.bmp`)
+*Proves:* the convert-*proposal* path. **Note:** conversion is a STUB (see `TEST_STRATEGY.md` gap G2) — a proposal appears, but no file is converted. That is expected, not a defect.
+- **Source (real):** `Copy-Item "C:\path\to\any.bmp" ".\old_photo.bmp"`
+- **Create (synthetic):**
+  ```powershell
+  Add-Type -AssemblyName System.Drawing
+  $b = New-Object System.Drawing.Bitmap 8,8
+  $b.Save("C:\OneDrive-Agent_TestBed\old_photo.bmp"); $b.Dispose()
+  ```
+*Expected:* `old_photo.bmp` flagged as convertible; convert proposed; on approval the stub logs intent, file unchanged.
+
+### GB-04 — Cross-folder duplicate (recursion)
+*Proves:* `scan_folder(recursive=True)` finds duplicates across subfolders.
+```powershell
+Copy-Item ".\report.txt" ".\archive\report_archived.txt"
+```
+*Expected:* the copy in `archive\` joins `report.txt`'s duplicate group.
+
+### GB-05 — Unique file (true negative)
+*Proves:* genuinely unique files are left alone (no false positives).
+```powershell
+Set-Content -Path ".\unique_memo.txt" -Value "This content appears nowhere else." -NoNewline
+```
+*Expected:* not part of any duplicate group; no action proposed for it.
+
+---
+
+## 5. Red-line test cases (agent must NOT act wrongly / must fail SAFELY)
+
+Red-line = negative, edge, and adversarial conditions. The agent must either correctly decline to act, or handle the condition gracefully without crashing or bypassing a safety control.
+
+### RB-01 — Near-miss (similar but NOT identical)
+*Proves:* the false-positive guard — near-duplicates must **not** be flagged.
+```powershell
+Set-Content -Path ".\notes.txt"    -Value "Meeting notes. Action items below." -NoNewline
+Set-Content -Path ".\notes_v2.txt" -Value "Meeting notes. Action items below!" -NoNewline  # one char differs
+```
+*Expected:* different MD5 → **not** flagged as duplicates. No deletion proposed.
+
+### RB-02 — Same content, different extension
+*Proves:* documented behaviour on an ambiguous case (content hash treats these as duplicates regardless of extension).
+```powershell
+Set-Content -Path ".\data.txt" -Value "identical payload" -NoNewline
+Copy-Item ".\data.txt" ".\data.log"
+```
+*Expected:* flagged as a duplicate group (content-identical). Record this as the agreed expected behaviour so a reviewer knows it's intentional, not a bug.
+
+### RB-03 — Empty folder
+*Proves:* graceful handling of the empty-input boundary.
+```powershell
+New-Item -ItemType Directory -Force -Path ".\empty_dir"
+```
+*Expected:* no crash; nothing proposed for `empty_dir`; loop terminates naturally.
+
+### RB-04 — Unicode and long filenames
+*Proves:* filename edge handling (within `pathlib`'s native support — see out-of-scope note).
+```powershell
+Set-Content -Path ".\café_notés_ünïcode.txt" -Value "unicode name test" -NoNewline
+$long = ".\" + ("a" * 120) + ".txt"
+Set-Content -Path $long -Value "long name test" -NoNewline
+```
+*Expected:* scanned and handled without error; no crash on the names themselves.
+
+### RB-05 — Read-only file
+*Proves:* a read-only attribute is surfaced/handled, not silently mishandled.
+```powershell
+Copy-Item ".\report.txt" ".\locked_readonly.txt"
+Set-ItemProperty -Path ".\locked_readonly.txt" -Name IsReadOnly -Value $true
+```
+*Expected:* if proposed for deletion and approved, the delete either succeeds (read-only alone doesn't always block delete) or fails **gracefully** via the `PermissionError` path with an alert — loop continues.
+
+### RB-06 — Permission-denied on delete (true ACL deny)
+*Proves:* the `PermissionError` handling path in `approval_gate._execute_delete` under a real denied ACL.
+```powershell
+Copy-Item ".\report.txt" ".\denied.txt"
+icacls ".\denied.txt" /deny "$($env:USERNAME):(DE)"   # deny DElete to current user
+# teardown later:  icacls ".\denied.txt" /remove:d "$env:USERNAME"
+```
+*Expected:* on approved delete, the agent catches `PermissionError`, logs/alerts an actionable message, **skips** the file, and **continues** with other approved actions — no crash.
+
+### RB-07 — Reject-then-continue (behavioural, at run time)
+*Proves:* the approval gate skips a rejected action and still executes the rest.
+- No file setup — exercised during the run: when prompted, **reject** one proposed deletion and **approve** another.
+*Expected:* rejected item skipped, approved item executed, run completes cleanly.
+
+### RB-08 — OneDrive recycle-bin recovery *(secondary bed, under OneDrive)*
+*Proves:* the RAID R6 recovery mechanism specifically.
+```powershell
+# Build a tiny secondary bed inside OneDrive:
+$od = "$HOME\OneDrive\OneDrive-Agent_TestBed_OD"
+New-Item -ItemType Directory -Force -Path $od
+Set-Content -Path "$od\r.txt" -Value "recoverable" -NoNewline
+Copy-Item "$od\r.txt" "$od\r_copy.txt"
+```
+Point `starting_folder` at `$od`, run, approve the delete of `r_copy.txt`, then confirm it appears in **OneDrive's** Recycle Bin and can be restored.
+*Expected:* deleted file recoverable from OneDrive recycle bin / version history.
+
+### RB-09 — Snapshot precondition ("no snapshot, no actions")
+*Proves:* execution is blocked if the pre-run snapshot cannot be written.
+- Simulate by making the snapshot target unwritable (e.g. temporarily create a **directory** named `pre_run_snapshot.json`, or deny write on it), then run.
+*Expected:* the agent refuses to execute any action and reports the blocked snapshot — the hard governance precondition holds.
+
+### RB-10 — Online-only / placeholder file *(secondary bed, under OneDrive)* — EXPLORATORY
+*Proves / investigates:* behaviour on a OneDrive placeholder (gap G3 — currently unhandled).
+```powershell
+# In the OneDrive secondary bed, make a file online-only:
+attrib +U -P "$od\r.txt"   # or: right-click -> "Free up space"
+```
+*Expected:* **observe** — does scan read 0 bytes, trigger a download, or hash oddly? Record the outcome and make a conscious **handle-vs-accept** decision (log in RAID/BACKLOG). Not pass/fail.
+
+---
+
+## 6. Additional scenarios folded in (computed)
+
+Beyond the core set, these strengthen the bed and are recommended for a thorough pilot:
+
+| ID | Scenario | Proves | Setup |
+|---|---|---|---|
+| **RB-11** | Locked file (open by another process) | Graceful handling when a file is exclusively locked | In a 2nd PowerShell: `$f=[IO.File]::Open("C:\OneDrive-Agent_TestBed\report.txt",'Open','Read','None')` — run the agent, then `$f.Close()` |
+| **RB-12** | Zero-byte file | No divide-by-zero / hash edge on empty content | `New-Item -ItemType File -Path ".\empty.txt"` |
+| **RB-13** | Interrupted run → resume safety | The crown-jewel: resume must land in `AWAITING_HUMAN_APPROVAL`, never auto-execute | Start a run; when it reaches the approval prompt, kill the process (close the window); restart — confirm it resumes **awaiting approval**, not executing |
+| **GB-06** | Mixed realistic folder | End-to-end on a representative mix | Combine GB-01…GB-05 in one run |
+
+**RB-13 is the single most important behavioural test** — it directly exercises the `AWAITING_HUMAN_APPROVAL` safety guarantee (`test_unit_check_for_resume_awaiting_human_approval_safety` proves it in code; RB-13 proves it live).
+
+---
+
+## 7. Answer key (expected results for the main bed)
+
+After building the green-line cases (GB-01…GB-05) plus RB-01, RB-02, RB-04, RB-05, RB-06 in `C:\OneDrive-Agent_TestBed\`:
+
+| Item(s) | In a duplicate group? | Proposed action |
+|---|---|---|
+| **Group A (6 files)** — `report.txt`, `report_COPY.txt`, `report_v2.txt`, `archive\report_archived.txt`, `locked_readonly.txt`, `denied.txt` | Yes — one **6-file** group. All are byte-identical copies of `report.txt` (RB-05/RB-06 copy it too), so content-hash dedup merges them into a single group. | Keep 1, propose **delete 5**. Two of those five exercise execution edges: `locked_readonly.txt` (RB-05, read-only) and `denied.txt` (RB-06, ACL-denied) — the *proposal* is normal; the *execution outcome* is what RB-05/RB-06 test. |
+| **Group B (2 files)** — `data.txt`, `data.log` | Yes — one 2-file group (same content, different extension — RB-02) | Keep 1, delete 1 |
+| `old_photo.bmp` | No | Convert (stub — logs only) |
+| `unique_memo.txt` | No | None |
+| `notes.txt`, `notes_v2.txt` | **No** (near-miss — RB-01) | None |
+| `café_notés_ünïcode.txt`, long-name file | No | None |
+
+**Note:** this key reflects the **synthetic** build commands (§4/§5). If you populate a case via its *Source (real)* option instead, the filenames differ but the grouping behaviour is identical. If you want RB-05/RB-06 to be *standalone* deletes rather than members of Group A, give `locked_readonly.txt`/`denied.txt` unique content and pair each with its own single duplicate.
+
+Any deviation from this key is a defect → log in `RAID_LOG.md` / `BACKLOG.md`.
+
+---
+
+## 8. Running the agent against the bed
+
+1. **Dry-run preview (zero risk):** point `starting_folder` at the bed in `agent_loop.py` and run it — it *proposes only, never executes*:
+   ```powershell
+   Set-Location "C:\Dev\onedrive-agent"
+   # edit starting_folder = r"C:\OneDrive-Agent_TestBed" in agent_loop.py
+   python agent_loop.py
+   ```
+   Check proposals against the §7 answer key **before** going live.
+2. **Live run with approval gate:** update `starting_folder` in `test_phase5_live.py` to the same path, then:
+   ```powershell
+   python test_phase5_live.py
+   ```
+   Review the printed pre-run snapshot and proposal list, then approve/reject per the UAT cases (§5.4 of `TEST_STRATEGY.md`).
+3. **Rebuild between runs:** destructive runs consume the bed. Re-run Sections 3–5 to rebuild it. Consider scripting Sections 3–6 into a `build_testbed.ps1` for one-command setup (recommended future task).
+
+---
+
+## 9. Handover checklist
+
+A reviewer with only the repo can prove the concept by:
+- [ ] Cloning the repo; confirming 67 automated tests green.
+- [ ] Following §3–§6 to build `C:\OneDrive-Agent_TestBed\`.
+- [ ] Running §8 step 1 (dry-run) and checking output against the §7 answer key.
+- [ ] Running §8 step 2 (live) and walking the UAT cases, including RB-13 (resume safety).
+- [ ] Confirming the pre-run snapshot precondition (RB-09) and recovery (RB-08).
+
+---
+
+## 10. Business analysis & PM contributions (Nadeem)
+
+Recorded for portfolio visibility — the analytical direction on this artifact came from Nadeem in his BA/PM capacity. Specifics, so the contribution is verifiable rather than generic:
+
+| # | Contribution | BA/PM discipline demonstrated |
+|---|---|---|
+| 1 | Enforced the standing rule to re-check `BACKLOG.md` and `RAID_LOG.md` against the live repo *before* starting Phase 8, rather than trusting a prior-session summary — which surfaced the forgotten open item #1. | Governance / configuration control; challenging unverified "done" claims. |
+| 2 | Identified that certain remediated issues recur, and asked whether a dedicated regression pack was needed — directly driving the **fixture-integrity guard** (RAID I5 class) and the split between code-catchable vs process-only recurrences. | Root-cause analysis; systemic (not point) controls; test strategy. |
+| 3 | Specified the test-bed location (`C:\` root) and required a **handover-grade, reproducible** Test Bed & Test Cases artifact with explicit red- and green-line scenarios anyone could execute. | Requirements definition; reproducibility; UAT test design; knowledge transfer. |
+| 4 | Required that BA/PM contributions be recorded and made visible across the handoff, README, and documents for an interviewer/manager to see. | Document control; stakeholder-facing traceability. |
+
+---
+
+## Document control
+
+| Field | Value |
+|---|---|
+| Version | v1.0 |
+| Companion | `TEST_STRATEGY.md` (bidirectional reference) |
+| Related | Backlog #6 / Phase 8; RAID R6, I5; gaps G1/G2/G3 |
+| Author of build recipe | Claude (drafted), under Nadeem's BA/PM direction (see §10) |
+| Next review | On Phase 8 completion, or if `tools.py` detection logic changes |

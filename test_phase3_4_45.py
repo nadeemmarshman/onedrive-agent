@@ -25,6 +25,9 @@ NO LIVE API CALLS: all tests in this suite are fully local. The
   an API key, without network access, and without API cost.
 """
 
+import os
+os.environ.pop("SENDGRID_API_KEY", None)  # test isolation: the suite must never send real alert emails (RAID I6)
+
 import inspect
 import json
 import logging

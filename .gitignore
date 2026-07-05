@@ -26,3 +26,5 @@ Thumbs.db
 # VS Code / editor settings (local preferences, not project config)
 .vscode/
 .idea/
+
+pre_run_snapshot.json
