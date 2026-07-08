@@ -1,11 +1,13 @@
 # OneDrive Cleanup Agent
 
-A small, hand-built AI agent that finds duplicate and bloated files in a
+A small AI agent that finds duplicate and bloated files in a
 OneDrive folder, proposes clean-up actions, and executes them — but only
 after explicit human approval of each action.
 
-Built from scratch in Python against the Anthropic API to demonstrate the
-core agent loop (tool definition → LLM decision → action → observation)
+Designed, governed, and directed as a Business Analyst / Project Manager
+(BA/PM) exercise — with the Python implemented collaboratively with an AI
+assistant under that direction — against the Anthropic API. It demonstrates
+the core agent loop (tool definition → LLM decision → action → observation)
 and the BA/PM discipline applied to a technical build: requirements, design,
 risk management, governance, and iterative delivery.
 
@@ -191,10 +193,11 @@ Every phase that introduces new functions is tested in two ordered layers:
 2. **Integration tests** — functions tested chained together, with data
    flowing as it will in the real agent loop
 
-The test suite scales with the project: `test_phase2.py` covers Phases 1–2;
-`test_phase3_4_45.py` covers Phases 3–5 (45 tests: 40 unit + 5 integration,
-all passing). Unit tests run first; if any fail, integration tests are
-skipped and flagged as not meaningful until the unit layer is clean.
+The test suite scales with the project across three files — `test_phase2.py`
+(Phases 1–2), `test_phase3_4_45.py` (Phases 3–5), and `test_phase8_pre_pilot.py`
+(Phase 8 pre-pilot checks) — spanning both unit and integration layers, all
+passing. Unit tests run first; if any fail, integration tests are skipped and
+flagged as not meaningful until the unit layer is clean.
 
 **Independent peer review (2026-07-02):** as an additional check beyond
 this project's own test suite, Claude Cowork was asked to independently
@@ -255,8 +258,13 @@ than assume, and catch problems before they compound.
 - `agent_loop.py` — Phase 4 full execution loop with structured logging
 - `resilience.py` — Phase 4.5 resilience and alerting
 - `approval_gate.py` — Phase 5 human-approval gate
-- `test_phase3_4_45.py` — Phase 3–5 test suite (45 tests)
+- `test_phase3_4_45.py` — Phase 3–5 automated test suite
 - `test_phase5_live.py` — end-to-end live test runner (Phases 1–5)
+- `test_phase8_pre_pilot.py` — Phase 8 pre-pilot automated checks
+- `TEST_STRATEGY.md` — overall test strategy
+- `TEST_BED_AND_CASES.md` — Phase 8 pilot test bed and case list
+- `architecture.svg` — architecture diagram (rendered inline above)
+- `LICENSE` — MIT licence
 - `sample_data/` — disposable test folder with planted edge cases
 - `BACKLOG.md` — Agile Product Backlog and Daily Scrum log
 - `RAID_LOG.md` — Risks, Assumptions, Issues, Dependencies (markdown)
