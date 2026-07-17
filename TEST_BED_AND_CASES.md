@@ -1,12 +1,12 @@
 # Test Bed & Test Cases — OneDrive Cleanup Agent
 
-**Version:** v2.0
-**Date:** 2026-07-09
+**Version:** v2.1
+**Date:** 2026-07-16
 **Repo:** `github.com/nadeemmarshman/onedrive-agent`
 **Companion to:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) — this document is the hands-on construction guide for the Phase 8 User Acceptance Testing (UAT) / Pilot test bed defined there (§5). Read `TEST_STRATEGY.md` first for the *why*; this document is the *how*.
 **Acronyms:** expanded on first use per document and per major section; full register in [`GLOSSARY.md`](./GLOSSARY.md).
 
-**What changed in v2.0:** added §8 — the pilot audit-control regime (checkpoints CP1/CP2/CP3, independent-tool reconciliation, and the signed-off materiality rule); updated the run sequence (§9) and handover checklist (§10) to weave the checkpoints in; recorded environment exclusions surfaced 2026-07-08; case prefixes GB/RB now defined explicitly. Test cases GB-01…GB-06 and RB-01…RB-13 and the answer key (§7) are unchanged from v1.0. Full change history in §12.
+**What changed in v2.1:** §8.3 corrected — -Encoding UTF8 added to all checkpoint manifest exports (defect found at CP1: Windows PowerShell 5.1 silently corrupts unicode filenames without it), the hash-grouping command added (previously missing), and a real expected-output example added in the tool's own order. No changes to test cases, answer key, or the materiality rule. Full change history in §12.
 
 ---
 
@@ -271,8 +271,31 @@ Get-ChildItem -Path "C:\OneDrive-Agent_TestBed" -Recurse -File |
   Get-FileHash -Algorithm MD5 |
   Select-Object Hash, Path |
   Sort-Object Path |
-  Export-Csv -Path "C:\OneDrive-Agent_Audit\CP1_manifest.csv" -NoTypeInformation
+  Export-Csv -Path "C:\OneDrive-Agent_Audit\CP1_manifest.csv" -NoTypeInformation -Encoding UTF8
 ```
+-Encoding UTF8 is required — without it, Windows PowerShell 5.1 silently corrupts unicode filenames in the CSV (defect found and fixed at CP1, 2026-07-15). Applies to all three checkpoint exports (CP1/CP2/CP3).
+
+**Grouping manifest hashes into duplicate groups**
+```powershell
+Import-Csv "C:\OneDrive-Agent_Audit\CP1_manifest.csv" |
+  Group-Object Hash |
+  Where-Object { $_.Count -ge 2 } |
+  ForEach-Object { "--- Group of $($_.Count) files | MD5 = $($_.Name)"; $_.Group.Path; "" }
+```
+**Expected output (example — CP1 baseline, 2026-07-15/16, in the tool's own order):**
+```
+--- Group of 6 files | MD5 = F807552F27F3CF51C0313FBCAE2E5DFB
+C:\OneDrive-Agent_TestBed\archive\report_archived.txt
+C:\OneDrive-Agent_TestBed\denied.txt
+C:\OneDrive-Agent_TestBed\locked_readonly.txt
+C:\OneDrive-Agent_TestBed\report.txt
+C:\OneDrive-Agent_TestBed\report_COPY.txt
+C:\OneDrive-Agent_TestBed\report_v2.txt
+--- Group of 2 files | MD5 = 13DB8397EFF4631B2FBF34BFD9582B52
+C:\OneDrive-Agent_TestBed\data.log
+C:\OneDrive-Agent_TestBed\data.txt
+```
+Note: `Group-Object` emits groups in first-appearance order of the hash in the manifest (which is path-sorted); paths within a group appear in manifest order. Ordering differences between runs are presentation-only (non-gating, per §8.4).
 
 Repeat with `CP2_manifest.csv` / `CP3_manifest.csv` at the later checkpoints. Comparing two manifests:
 
@@ -378,7 +401,7 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 
 | Field | Value |
 |---|---|
-| Version | v2.0 |
+| Version | v2.1 |
 | Companion | `TEST_STRATEGY.md` (bidirectional reference); `GLOSSARY.md` (acronym register) |
 | Related | Backlog #6 / Phase 8; RAID R6, I5; gaps G1/G2/G3; handoff v8.0 (audit regime standing rule) |
 | Author of build recipe | Claude (drafted), under Nadeem's BA/PM direction (see §11) |
@@ -390,3 +413,4 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 |---|---|---|
 | v1.0 | 2026-07-05 | Initial: two-bed design, GB-01…GB-06, RB-01…RB-13, answer key, handover checklist |
 | v2.0 | 2026-07-09 05:16 | Added §8 pilot audit-control regime (CP1/CP2/CP3, tooling roles, signed-off Reconciliation & Materiality Rule v1.0, ratified edge treatments, environment exclusions); run sequence and handover checklist updated to include checkpoints; GB/RB prefixes defined; glossary pointer added; BA/PM contributions extended (rows 5–7). Test cases and answer key unchanged. |
+| v2.1 | 2026-07-16 08:06 | §8.3 corrected: -Encoding UTF8 added to all three checkpoint exports (unicode-corruption defect found and fixed at CP1, 2026-07-15); hash-grouping command added; expected-output example added from the real CP1 baseline. Defect and fix recorded in RAID and handoff v8.2. |
