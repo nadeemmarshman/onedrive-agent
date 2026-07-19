@@ -1,8 +1,8 @@
-# OneDrive Cleanup Agent
+# OneDrive Cleanup Agent (OneDrive AI Agent)
 
-A small AI agent that finds duplicate and bloated files in a
-OneDrive folder, proposes clean-up actions, and executes them — but only
-after explicit human approval of each action.
+A small AI agent — the **OneDrive AI Agent** — that finds duplicate and
+bloated files in a OneDrive folder, proposes clean-up actions, and
+executes them — but only after explicit human approval of each action.
 
 Designed, governed, and directed as a Business Analyst / Project Manager
 (BA/PM) exercise — with the Python implemented collaboratively with an AI
@@ -29,10 +29,10 @@ something they actually built. Fewer still apply formal PM artefacts
 (RAID log, Agile backlog, decision log, two-layer test suite) to the build
 process itself.
 
-The agent automates a genuinely useful task (deduplicating a cluttered
-OneDrive folder), but the real goal is to understand — and be able to
-demonstrate — the core loop that underlies tools like Claude Code, MCP
-connectors, and Cowork:
+The OneDrive AI Agent automates a genuinely useful task (deduplicating a
+cluttered OneDrive folder), but the real goal is to understand — and be
+able to demonstrate — the core loop that underlies tools like Claude Code,
+MCP connectors, and Cowork:
 
 **tool definition → LLM decision → action → observation → repeat**
 
@@ -42,7 +42,7 @@ connectors, and Cowork:
 
 ![OneDrive Cleanup Agent architecture diagram](architecture.svg)
 
-The agent runs in phases, each building on the last:
+The OneDrive AI Agent runs in phases, each building on the last:
 
 ```
 [Scan folder]
@@ -72,13 +72,25 @@ The agent runs in phases, each building on the last:
               [Done]
 
 Supporting layer (Phase 4.5):
-  State machine   — persisted to disk at each step for restart-and-resume
+  State machine   — designed for restart-and-resume, persisted to disk
+                    at each step (see correction below — not yet wired
+                    into the live path)
   SendGrid alerts — 5W incident framework, masked user ID, per-error
                     troubleshooting steps
 ```
 
-**User roles:** single-user model — the person running the agent is also
-the approver. A multi-role model (separate operator and approver,
+**Correction (2026-07-19, RAID I16):** the state machine above is
+correctly designed and unit-tested in isolation, but the Phase 8 pilot
+found it was never actually wired into the live scripts (`agent_loop.py`,
+`approval_gate.py`) — so `agent_state.json` is never written during a
+real run, and a restart does not literally resume from a saved state.
+The practical safety guarantee still holds (verified empirically — an
+unplanned crash never causes unapproved execution, via "always restart
+clean"), but the live-persistence mechanism itself is not yet proven
+live. Full detail: `PILOT_SIGNOFF_SUMMARY.md`.
+
+**User roles:** single-user model — the person running the OneDrive AI
+Agent is also the approver. A multi-role model (separate operator and approver,
 role-based alert routing) is a logged future consideration, not an
 unconsidered gap (see BACKLOG.md item #5).
 
@@ -95,8 +107,8 @@ unconsidered gap (see BACKLOG.md item #5).
 | 4.5 | Resilience & Alerting — SendGrid email alerts (5W incident framework), state machine with restart-and-resume for load-shedding resilience | ✅ Complete |
 | 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
 | 6 | Polish — full README, architecture diagram, repo public | ✅ Complete |
-| 7 | Comparison against Claude Cowork (Anthropic's own production agent) — evaluate the hand-built version against a finished product | ✅ Complete |
-| 8 | UAT / Pilot — validate the agent against a real, limited subset of live OneDrive data before full production rollout | 🔜 Planned |
+| 7 | Comparison against Claude Cowork (Anthropic's own production agentic tool) — evaluate the hand-built OneDrive AI Agent against a finished product | ✅ Complete |
+| 8 | UAT / Pilot — validate the OneDrive AI Agent against a real, limited subset of live OneDrive data before full production rollout | ✅ Test execution complete — sign-off pending |
 
 ---
 
@@ -112,7 +124,7 @@ framing than with this project's own phase numbering:
 | Design | Phase 2 | `tool_contracts.py` (interface/technical design) |
 | Development | Phases 3, 4, 4.5, 5 | `decision_loop.py`, `agent_loop.py`, `resilience.py`, `approval_gate.py` |
 | Testing / QA | Pre-Phase-5 gate, `test_phase2.py`, `test_phase3_4_45.py`, Phase 7 (Cowork as independent validation) | Test suites, `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` |
-| **UAT / Pilot** | **Phase 8 (planned)** | Validation against a real, limited OneDrive subset before full rollout |
+| **UAT / Pilot** | **Phase 8 (test execution complete, sign-off pending)** | Validation against a real, limited OneDrive subset before full rollout — see `PILOT_SIGNOFF_SUMMARY.md` |
 | Deployment | Full OneDrive rollout (future) | — |
 | Maintenance | Ongoing | `BACKLOG.md`, `RAID_LOG.md` |
 
@@ -167,8 +179,9 @@ This project applies BA/PM discipline to a technical build — not just to
 the code, but to the process itself:
 
 - **RAID_LOG.md / docs/RAID_Log.xlsx** — Risks, Assumptions, Issues, and
-  Dependencies tracked throughout the build (6 risks, 6 assumptions,
-  5 issues, 4 dependencies at time of writing)
+  Dependencies tracked live throughout the build and the pilot,
+  including issues found and root-caused by an independent reviewer
+  (see below)
 - **BACKLOG.md** — Agile Product Backlog and Daily Scrum log, including
   retrospective notes on what went wrong and what process changes resulted
 - **Decision log** (in the handoff document) — every design trade-off
@@ -231,8 +244,12 @@ than assume, and catch problems before they compound.
   3 (natural termination, not the safety-limit fallback)
 - ✅ Phase 4.5 complete: `resilience.py` — SendGrid alerting (7 named alert
   functions, 5W incident framework, masked user credentials, README-reference
-  pattern on all commands) and explicit state machine (5 named states,
-  persisted to disk, `AWAITING_HUMAN_APPROVAL` never silently skipped)
+  pattern on all commands) and an explicit state machine (5 named states,
+  state persistence, `AWAITING_HUMAN_APPROVAL` safety guarantee), both
+  correctly implemented and unit-tested. **Correction (2026-07-19, RAID
+  I16):** the Phase 8 pilot found this state machine was never wired into
+  the live scripts, so state is not actually persisted during a real run
+  — see the architecture-diagram correction above and `PILOT_SIGNOFF_SUMMARY.md`
 - ✅ Phase 5 complete: `approval_gate.py` — proven in a live run: invalid
   input caught and re-prompted, real file deleted on approval, rejected
   action correctly skipped, pre-run snapshot verified with matching MD5 hashes
@@ -242,10 +259,21 @@ than assume, and catch problems before they compound.
 - 🔍 **Independent peer review (2026-07-02):** Claude Cowork reviewed all
   project files; found and correctly diagnosed a real test isolation bug
   plus three minor documentation drifts. All fixed and verified same day.
-  Full account in `docs/REMEDIATION_2026-07-02_cowork-peer-review.md`. Agent's
-  own model also switched from `claude-sonnet-4-6` to `claude-sonnet-5`
-  to align with Claude Chat/Cowork (see handoff document Decision log).
-- 🔜 Phase 8 planned — UAT/Pilot against a real, limited OneDrive subset
+  Full account in `docs/REMEDIATION_2026-07-02_cowork-peer-review.md`. The
+  OneDrive AI Agent's own model also switched from `claude-sonnet-4-6` to
+  `claude-sonnet-5` to align with Claude Chat/Cowork (see handoff document
+  Decision log).
+- ✅ **Phase 8 test execution complete (2026-07-19) — sign-off pending:**
+  UAT/Pilot against a real, limited OneDrive subset. All 19 green-line/
+  red-line test cases closed, three independently-verified checkpoints
+  (CP1/CP2/CP3) passed, and the pilot's most safety-critical property —
+  no unapproved execution after an unplanned crash — verified empirically.
+  One finding disclosed honestly rather than rounded up: the crash-recovery
+  test's originally-specified mechanism (saved-state resume) was found not
+  to be wired into the live code path; the behavioural safety guarantee is
+  proven, the specific resume mechanism is not yet live (tracked as a
+  post-pilot item). `PILOT_SIGNOFF_SUMMARY.md` (full detail) recommends
+  sign-off; that decision has not yet formally been made.
 
 ---
 
@@ -262,7 +290,12 @@ than assume, and catch problems before they compound.
 - `test_phase5_live.py` — end-to-end live test runner (Phases 1–5)
 - `test_phase8_pre_pilot.py` — Phase 8 pre-pilot automated checks
 - `TEST_STRATEGY.md` — overall test strategy
-- `TEST_BED_AND_CASES.md` — Phase 8 pilot test bed and case list
+- `TEST_BED_AND_CASES.md` — Phase 8 pilot test bed and case list (technical
+  build/execution recipe)
+- `TEST_USE-CASES_PLAIN_ENGLISH.md` — every GB/RB test case restated as a
+  plain-English user story, for a non-technical reviewer
+- `PILOT_SIGNOFF_SUMMARY.md` — one-page Phase 8 pilot sign-off summary:
+  checkpoint results, defects found/fixed, and honest coverage disclosure
 - `architecture.svg` — architecture diagram (rendered inline above)
 - `LICENSE` — MIT licence
 - `sample_data/` — disposable test folder with planted edge cases
@@ -273,6 +306,8 @@ than assume, and catch problems before they compound.
 - `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` — Root Cause Analysis
   and remediation report for findings from an independent Claude Cowork
   peer review (see RAID_LOG.md, Issue I5)
+- `GLOSSARY.md` — canonical acronym/abbreviation register for the whole
+  project
 
 ---
 
@@ -284,7 +319,7 @@ you to "see README.md for the correct path."
 | Item | Default location |
 |---|---|
 | Project folder | `C:\Dev\onedrive-agent\` |
-| Run the agent | `python agent_loop.py` (from the project folder) |
+| Run the OneDrive AI Agent | `python agent_loop.py` (from the project folder) |
 | State file | `agent_state.json` in the project folder |
 | Pre-run snapshot | `pre_run_snapshot.json` in the project folder |
 | Run logs | `logs\` subfolder inside the project folder |
@@ -294,7 +329,7 @@ If you move the project, update this table so alert instructions stay accurate.
 
 ---
 
-## Running the agent
+## Running the OneDrive AI Agent
 
 ```
 cd C:\Dev\onedrive-agent
@@ -308,25 +343,25 @@ User-level environment variables (see README table above for setup).
 
 ## Comparison against Claude Cowork
 
-**What this is:** After building the agent by hand, the same file-organisation
+**What this is:** After building the OneDrive AI Agent by hand, the same file-organisation
 task was given to Claude Cowork — Anthropic's own production-grade agentic
 tool — on the same controlled test data (`sample_data/`). The goal: evaluate
 how the hand-built version compares to a finished product built on the same
 underlying loop, and identify what each does that the other doesn't.
 
 **Models used:**
-- Hand-built agent (Phases 3–5, as originally built and tested): `claude-sonnet-4-6`
+- Hand-built OneDrive AI Agent (Phases 3–5, as originally built and tested): `claude-sonnet-4-6`
   (released February 2026) — chosen at the time because it was accessible on
   the free tier during an early, budget-constrained phase of this project
 - Claude Cowork (Phase 7): `claude-sonnet-5` (released June 30, 2026 — the
   day before this comparison was run)
 - **Post-comparison update:** once this project demonstrated enough value to
   justify a paid Claude subscription, and the Phase 7 comparison surfaced a
-  model-version mismatch between the agent's API calls and Claude Chat/Cowork
-  (both already on Sonnet 5), the agent's model string was switched to
-  `claude-sonnet-5` in `decision_loop.py` and `agent_loop.py`. All three
-  surfaces — Claude Chat, Claude Cowork, and this agent's own API calls —
-  are now aligned on Sonnet 5. See handoff document Decision log (item 7)
+  model-version mismatch between the OneDrive AI Agent's API calls and
+  Claude Chat/Cowork (both already on Sonnet 5), its model string was
+  switched to `claude-sonnet-5` in `decision_loop.py` and `agent_loop.py`.
+  All three surfaces — Claude Chat, Claude Cowork, and the OneDrive AI
+  Agent's own API calls — are now aligned on Sonnet 5. See handoff document Decision log (item 7)
   for the full trade-off record.
 - **Key capability difference (Sonnet 4.6 → Sonnet 5):** Sonnet 5 is a direct
   upgrade over Sonnet 4.6, with its largest gains in agentic tasks and coding
@@ -359,7 +394,7 @@ rename `original_notes_v2.txt` to something clearer (e.g.
 
 ### Comparison
 
-| Dimension | Hand-built agent | Claude Cowork |
+| Dimension | Hand-built OneDrive AI Agent | Claude Cowork |
 |---|---|---|
 | Model | `claude-sonnet-4-6` | `claude-sonnet-5` (Sonnet 5, released 2026-06-30) |
 | Duplicate detection | MD5 content hash via Python | MD5 content hash via file inspection |
@@ -369,7 +404,7 @@ rename `original_notes_v2.txt` to something clearer (e.g.
 | Audit trail | `pre_run_snapshot.json` (path, size, MD5, timestamp per affected file) | Not visible to user |
 | Structured logging | `INFO`/`WARNING`/`ERROR` to timestamped log file per run | Not visible to user |
 | Email alerting | SendGrid, 7 named alert functions, 5W incident framework | Not present |
-| State machine | Explicit 5-state machine persisted to disk — survives power outage | Not present |
+| State machine | Explicit 5-state machine, designed and unit-tested for persisted restart-and-resume — not yet wired into the live path (see Current state, Phase 4.5, above) | Not present |
 | Rename suggestions | Not in scope | Added proactively |
 | Underlying mechanics | Fully visible — tool contracts, decision loop, state transitions in code | Production black box |
 
@@ -377,7 +412,7 @@ rename `original_notes_v2.txt` to something clearer (e.g.
 
 **On findings:** Cowork reached the same conclusions on every test case —
 same duplicate identified, same near-miss correctly excluded, same conversion
-candidate flagged. The core agent logic in the hand-built version is validated
+candidate flagged. The core OneDrive AI Agent logic in the hand-built version is validated
 against a production tool.
 
 **On governance:** Where the hand-built version differs from Cowork is not
@@ -388,13 +423,13 @@ with stated reasons — none of these are visible in Cowork's output. This
 reflects the BA/PM framing of the project: the governance layer is as
 important as the functional output.
 
-**On transparency:** Building the agent by hand makes the underlying
+**On transparency:** Building the OneDrive AI Agent by hand makes the underlying
 mechanics inspectable. Cowork is a polished, production-capable tool;
 the hand-built version is a learning and demonstration artefact. Both
 are useful — for different purposes.
 
 **On scope:** Cowork's proactive rename suggestion shows one area where
 a production tool adds value beyond the defined task — general-purpose
-reasoning applied opportunistically. The hand-built agent only does what
+reasoning applied opportunistically. The hand-built OneDrive AI Agent only does what
 it was explicitly designed to do, which is appropriate for a controlled,
 governed pipeline but less flexible than a general-purpose agent.
