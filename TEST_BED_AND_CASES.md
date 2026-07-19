@@ -1,12 +1,12 @@
 # Test Bed & Test Cases — OneDrive Cleanup Agent
 
-**Version:** v2.1
-**Date:** 2026-07-16
+**Version:** v2.2
+**Date:** 2026-07-19
 **Repo:** `github.com/nadeemmarshman/onedrive-agent`
 **Companion to:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) — this document is the hands-on construction guide for the Phase 8 User Acceptance Testing (UAT) / Pilot test bed defined there (§5). Read `TEST_STRATEGY.md` first for the *why*; this document is the *how*.
 **Acronyms:** expanded on first use per document and per major section; full register in [`GLOSSARY.md`](./GLOSSARY.md).
 
-**What changed in v2.1:** §8.3 corrected — -Encoding UTF8 added to all checkpoint manifest exports (defect found at CP1: Windows PowerShell 5.1 silently corrupts unicode filenames without it), the hash-grouping command added (previously missing), and a real expected-output example added in the tool's own order. No changes to test cases, answer key, or the materiality rule. Full change history in §12.
+**What changed in v2.2:** §8.3 corrected again — the single hardcoded CP1 export example (plus a prose "repeat with CP2/CP3" instruction) replaced with three explicit, individually-labeled export commands (CP1/CP2/CP3), each with its own output filename spelled out. Fixes the defect that caused Issue I11 (2026-07-19): copying the old §8.3 block verbatim at CP3 reused the `CP1_manifest.csv` filename and overwrote the original CP1 baseline. No changes to test cases, answer key, or the materiality rule. Full change history in §12.
 
 ---
 
@@ -263,8 +263,11 @@ This makes the existing Phase 5 `pre_run_snapshot.json` control *independently v
 
 ### 8.3 Producing a manifest
 
-Manifests are stored **outside the bed** (so audit artefacts never contaminate the scan target and never appear in a later manifest as "unexplained new files"):
+Manifests are stored **outside the bed** (so audit artefacts never contaminate the scan target and never appear in a later manifest as "unexplained new files"). Each checkpoint has its own export command below, **with its own output filename spelled out explicitly**. Copy the block for the checkpoint you are actually at — do not reuse the CP1 block by hand-editing the filename (this caused Issue I11: the CP3 export was copied from an earlier single-example version of this section without changing the filename, silently overwriting the CP1 baseline instead of producing a separate CP3 file).
 
+-Encoding UTF8 is required on all three — without it, Windows PowerShell 5.1 silently corrupts unicode filenames in the CSV (defect found and fixed at CP1, 2026-07-15).
+
+**CP1 — baseline export:**
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\OneDrive-Agent_Audit"
 Get-ChildItem -Path "C:\OneDrive-Agent_TestBed" -Recurse -File |
@@ -273,9 +276,26 @@ Get-ChildItem -Path "C:\OneDrive-Agent_TestBed" -Recurse -File |
   Sort-Object Path |
   Export-Csv -Path "C:\OneDrive-Agent_Audit\CP1_manifest.csv" -NoTypeInformation -Encoding UTF8
 ```
--Encoding UTF8 is required — without it, Windows PowerShell 5.1 silently corrupts unicode filenames in the CSV (defect found and fixed at CP1, 2026-07-15). Applies to all three checkpoint exports (CP1/CP2/CP3).
 
-**Grouping manifest hashes into duplicate groups**
+**CP2 — read-only-proof export:**
+```powershell
+Get-ChildItem -Path "C:\OneDrive-Agent_TestBed" -Recurse -File |
+  Get-FileHash -Algorithm MD5 |
+  Select-Object Hash, Path |
+  Sort-Object Path |
+  Export-Csv -Path "C:\OneDrive-Agent_Audit\CP2_manifest.csv" -NoTypeInformation -Encoding UTF8
+```
+
+**CP3 — change-control export:**
+```powershell
+Get-ChildItem -Path "C:\OneDrive-Agent_TestBed" -Recurse -File |
+  Get-FileHash -Algorithm MD5 |
+  Select-Object Hash, Path |
+  Sort-Object Path |
+  Export-Csv -Path "C:\OneDrive-Agent_Audit\CP3_manifest.csv" -NoTypeInformation -Encoding UTF8
+```
+
+**Grouping manifest hashes into duplicate groups** (substitute the manifest filename for the checkpoint you're grouping — example below uses CP1):
 ```powershell
 Import-Csv "C:\OneDrive-Agent_Audit\CP1_manifest.csv" |
   Group-Object Hash |
@@ -297,7 +317,7 @@ C:\OneDrive-Agent_TestBed\data.txt
 ```
 Note: `Group-Object` emits groups in first-appearance order of the hash in the manifest (which is path-sorted); paths within a group appear in manifest order. Ordering differences between runs are presentation-only (non-gating, per §8.4).
 
-Repeat with `CP2_manifest.csv` / `CP3_manifest.csv` at the later checkpoints. Comparing two manifests:
+Comparing two manifests:
 
 ```powershell
 Compare-Object (Import-Csv "C:\OneDrive-Agent_Audit\CP1_manifest.csv") `
@@ -401,7 +421,7 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 
 | Field | Value |
 |---|---|
-| Version | v2.1 |
+| Version | v2.2 |
 | Companion | `TEST_STRATEGY.md` (bidirectional reference); `GLOSSARY.md` (acronym register) |
 | Related | Backlog #6 / Phase 8; RAID R6, I5; gaps G1/G2/G3; handoff v8.0 (audit regime standing rule) |
 | Author of build recipe | Claude (drafted), under Nadeem's BA/PM direction (see §11) |
@@ -414,3 +434,4 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 | v1.0 | 2026-07-05 | Initial: two-bed design, GB-01…GB-06, RB-01…RB-13, answer key, handover checklist |
 | v2.0 | 2026-07-09 05:16 | Added §8 pilot audit-control regime (CP1/CP2/CP3, tooling roles, signed-off Reconciliation & Materiality Rule v1.0, ratified edge treatments, environment exclusions); run sequence and handover checklist updated to include checkpoints; GB/RB prefixes defined; glossary pointer added; BA/PM contributions extended (rows 5–7). Test cases and answer key unchanged. |
 | v2.1 | 2026-07-16 08:06 | §8.3 corrected: -Encoding UTF8 added to all three checkpoint exports (unicode-corruption defect found and fixed at CP1, 2026-07-15); hash-grouping command added; expected-output example added from the real CP1 baseline. Defect and fix recorded in RAID and handoff v8.2. |
+| v2.2 | 2026-07-19 | §8.3 corrected again: replaced the single hardcoded CP1 export example + prose "repeat with CP2/CP3" instruction with three explicit, individually-labeled export commands (CP1/CP2/CP3), each with its own filename spelled out. Fixes the defect behind Issue I11 (2026-07-19 live run): the old block was copied verbatim at CP3 and silently overwrote the CP1 baseline file. Defect and fix recorded in RAID (I11) and handoff (pending v8.4). |
