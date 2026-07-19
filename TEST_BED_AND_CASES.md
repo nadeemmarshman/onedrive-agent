@@ -1,12 +1,12 @@
 # Test Bed & Test Cases — OneDrive Cleanup Agent
 
-**Version:** v2.2
+**Version:** v2.3
 **Date:** 2026-07-19
 **Repo:** `github.com/nadeemmarshman/onedrive-agent`
 **Companion to:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) — this document is the hands-on construction guide for the Phase 8 User Acceptance Testing (UAT) / Pilot test bed defined there (§5). Read `TEST_STRATEGY.md` first for the *why*; this document is the *how*.
 **Acronyms:** expanded on first use per document and per major section; full register in [`GLOSSARY.md`](./GLOSSARY.md).
 
-**What changed in v2.2:** §8.3 corrected again — the single hardcoded CP1 export example (plus a prose "repeat with CP2/CP3" instruction) replaced with three explicit, individually-labeled export commands (CP1/CP2/CP3), each with its own output filename spelled out. Fixes the defect that caused Issue I11 (2026-07-19): copying the old §8.3 block verbatim at CP3 reused the `CP1_manifest.csv` filename and overwrote the original CP1 baseline. No changes to test cases, answer key, or the materiality rule. Full change history in §12.
+**What changed in v2.3:** New §5 subsection added under RB-06 — **"RB-06 fallback procedure — running it standalone"** — documents the concrete standalone invocation for RB-06, for use when a pilot run's keep-choice leaves `denied.txt` unexercised (as happened in both the 2026-07-15 dry run and the 2026-07-19 live run; see handoff Decision log). Gives the exact pre-run ACL check, the `pre_run_snapshot.json` backup step (guards against silently overwriting a prior run's evidence — the same lesson as Issue I11), the hand-built single-proposal invocation command, expected outcome, and post-run scope-verification checks. No changes to the core test cases, answer key, or the materiality rule. Full change history in §12.
 
 ---
 
@@ -164,6 +164,60 @@ icacls ".\denied.txt" /deny "$($env:USERNAME):(DE)"   # deny DElete to current u
 # teardown later:  icacls ".\denied.txt" /remove:d "$env:USERNAME"
 ```
 *Expected:* on approved delete, the agent catches `PermissionError`, logs/alerts an actionable message, **skips** the file, and **continues** with other approved actions — no crash.
+
+#### RB-06 fallback procedure — running it standalone
+
+*When this applies:* RB-06's setup above creates `denied.txt` as part of
+the main bed build, on the assumption a normal pilot run's delete
+proposals will include it. If the model's keep-choice for Group A
+instead lands on `denied.txt`, `denied.txt` is never proposed for
+deletion at all, and RB-06 goes unexercised. This happened in both the
+dry run (2026-07-15) and the live run (2026-07-19) — see handoff
+Decision log. This procedure exercises RB-06 directly, without
+rescanning or otherwise touching the rest of the (already CP3-closed)
+bed.
+
+*Precondition check (confirm before running):*
+```powershell
+Test-Path "C:\OneDrive-Agent_TestBed\denied.txt"          # expect True
+icacls "C:\OneDrive-Agent_TestBed\denied.txt"              # expect DESKTOP-<host>\<user>:(DENY)(DE)
+```
+
+*Preserve the prior run's evidence first — `pre_run_snapshot.json` is a
+single, non-timestamped file that this procedure will overwrite:*
+```powershell
+Copy-Item "C:\Dev\onedrive-agent\pre_run_snapshot.json" "C:\OneDrive-Agent_Audit\pre_run_snapshot_<label-the-run-you're-preserving>.json"
+```
+
+*Run — a single, hand-built proposal targeting only `denied.txt` (no
+`scan_folder`/`propose_action` call, so nothing else in the bed is
+touched or re-evaluated). Run from the repo root, so the `approval_gate`
+import resolves:*
+```powershell
+cd C:\Dev\onedrive-agent
+python -c "from approval_gate import run_approval_gate; proposals=[{'action_type': 'delete_duplicate', 'target_path': r'C:\OneDrive-Agent_TestBed\denied.txt', 'reason': 'RB-06 targeted fallback exercise -- ACL-denied delete execution (see RB-06 fallback procedure above)', 'details': {'keeper_path': r'C:\OneDrive-Agent_TestBed\report.txt', 'duplicate_path': r'C:\OneDrive-Agent_TestBed\denied.txt', 'size_bytes': 32}}]; result=run_approval_gate(proposals); print(result)"
+```
+At the approval prompt, **approve** (`y`) — RB-06 proves the
+*caught-failure* path, which only executes on an approved delete
+attempt. (`size_bytes: 32` and the MD5 below were verified live against
+`denied.txt` on disk on 2026-07-19 — not placeholder values. Re-verify
+if the bed is ever rebuilt.)
+
+*Expected:* `_execute_delete` raises `PermissionError`, is caught, logs
+an error, fires an alert email (screenshot it — same evidence standard
+as Issue I10), and the run summary prints `{'succeeded': 0, 'failed': 1,
+'skipped': 0, 'status': 'complete'}`. No crash, no bypass of the deny
+ACL.
+
+*Post-run verification (scope discipline — confirm nothing beyond
+`denied.txt` was touched):*
+```powershell
+Test-Path "C:\OneDrive-Agent_TestBed\denied.txt"                                    # expect True -- still exists, delete was blocked
+Get-FileHash "C:\OneDrive-Agent_TestBed\denied.txt" -Algorithm MD5                  # expect F807552F27F3CF51C0313FBCAE2E5DFB -- unchanged
+```
+
+*Record:* log the outcome as a new RAID entry and update the handoff
+document's outstanding-items list accordingly.
 
 ### RB-07 — Reject-then-continue (behavioural, at run time)
 *Proves:* the approval gate skips a rejected action and still executes the rest.
@@ -421,7 +475,7 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 
 | Field | Value |
 |---|---|
-| Version | v2.2 |
+| Version | v2.3 |
 | Companion | `TEST_STRATEGY.md` (bidirectional reference); `GLOSSARY.md` (acronym register) |
 | Related | Backlog #6 / Phase 8; RAID R6, I5; gaps G1/G2/G3; handoff v8.0 (audit regime standing rule) |
 | Author of build recipe | Claude (drafted), under Nadeem's BA/PM direction (see §11) |
@@ -435,3 +489,4 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 | v2.0 | 2026-07-09 05:16 | Added §8 pilot audit-control regime (CP1/CP2/CP3, tooling roles, signed-off Reconciliation & Materiality Rule v1.0, ratified edge treatments, environment exclusions); run sequence and handover checklist updated to include checkpoints; GB/RB prefixes defined; glossary pointer added; BA/PM contributions extended (rows 5–7). Test cases and answer key unchanged. |
 | v2.1 | 2026-07-16 08:06 | §8.3 corrected: -Encoding UTF8 added to all three checkpoint exports (unicode-corruption defect found and fixed at CP1, 2026-07-15); hash-grouping command added; expected-output example added from the real CP1 baseline. Defect and fix recorded in RAID and handoff v8.2. |
 | v2.2 | 2026-07-19 | §8.3 corrected again: replaced the single hardcoded CP1 export example + prose "repeat with CP2/CP3" instruction with three explicit, individually-labeled export commands (CP1/CP2/CP3), each with its own filename spelled out. Fixes the defect behind Issue I11 (2026-07-19 live run): the old block was copied verbatim at CP3 and silently overwrote the CP1 baseline file. Defect and fix recorded in RAID (I11) and handoff (pending v8.4). |
+| v2.3 | 2026-07-19 | Added a new §5 subsection under RB-06 — "RB-06 fallback procedure — running it standalone" — the concrete, previously-missing steps for exercising RB-06 against an already-built, CP3-closed bed when a pilot run's keep-choice leaves `denied.txt` unexercised (as happened 2026-07-15 and 2026-07-19). Covers the pre-run ACL check, a `pre_run_snapshot.json` backup step, the exact hand-built single-proposal invocation, expected outcome, and post-run scope verification. No changes to core test cases, answer key, or the materiality rule. |
