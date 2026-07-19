@@ -1,12 +1,12 @@
 # Test Bed & Test Cases — OneDrive Cleanup Agent
 
-**Version:** v2.3
+**Version:** v2.4
 **Date:** 2026-07-19
 **Repo:** `github.com/nadeemmarshman/onedrive-agent`
 **Companion to:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) — this document is the hands-on construction guide for the Phase 8 User Acceptance Testing (UAT) / Pilot test bed defined there (§5). Read `TEST_STRATEGY.md` first for the *why*; this document is the *how*.
 **Acronyms:** expanded on first use per document and per major section; full register in [`GLOSSARY.md`](./GLOSSARY.md).
 
-**What changed in v2.3:** New §5 subsection added under RB-06 — **"RB-06 fallback procedure — running it standalone"** — documents the concrete standalone invocation for RB-06, for use when a pilot run's keep-choice leaves `denied.txt` unexercised (as happened in both the 2026-07-15 dry run and the 2026-07-19 live run; see handoff Decision log). Gives the exact pre-run ACL check, the `pre_run_snapshot.json` backup step (guards against silently overwriting a prior run's evidence — the same lesson as Issue I11), the hand-built single-proposal invocation command, expected outcome, and post-run scope-verification checks. No changes to the core test cases, answer key, or the materiality rule. Full change history in §12.
+**What changed in v2.4:** New §5 subsection added under RB-09 — **"RB-09 fallback procedure — running it standalone"** — documents the concrete, live-tested invocation for RB-09 (broken-snapshot precondition), including the finding that this case blocks *before* any approval prompt is reached (unlike RB-06, needs no human approval), the exact `icacls` deny-write setup, expected outcome, post-run content-survival check, teardown, and a note on verifying alerts via Gmail search (including a subject-line collision caveat between RB-05/RB-06 alerts). No changes to the core test cases, answer key, or the materiality rule. Full change history in §12.
 
 ---
 
@@ -240,6 +240,71 @@ Point `starting_folder` at `$od`, run, approve the delete of `r_copy.txt`, then 
 *Proves:* execution is blocked if the pre-run snapshot cannot be written.
 - Simulate by making the snapshot target unwritable (e.g. temporarily create a **directory** named `pre_run_snapshot.json`, or deny write on it), then run.
 *Expected:* the agent refuses to execute any action and reports the blocked snapshot — the hard governance precondition holds.
+
+#### RB-09 fallback procedure — running it standalone
+
+*When this applies:* unlike RB-06, RB-09 isn't something a normal pilot
+run could stumble into naturally — it tests what happens when the
+snapshot file itself can't be written, which requires deliberately
+breaking that precondition first. Per §9's agreed plan, RB-09 always
+runs as a separate, targeted exercise after the main pilot, not folded
+into a normal scan/approve/execute run.
+
+*Key property, confirmed live (2026-07-19):* if `write_snapshot()`
+fails, `run_approval_gate()` returns `{"status": "blocked", ...}`
+*before* `present_proposals()` is ever called — so unlike RB-06, this
+procedure needs **no human approval prompt at all**. The block happens
+before approval is even requested.
+
+*Precondition setup — deny write access to the live
+`pre_run_snapshot.json` (run from the repo root, where the file
+actually lives):*
+```powershell
+cd C:\Dev\onedrive-agent
+icacls "pre_run_snapshot.json" /deny "$($env:USERNAME):(WD)"
+```
+`(WD)` = Write Data — the specific right needed to overwrite an
+existing file's content; denying it is enough to make
+`open(path, "w")` raise `PermissionError`.
+
+*Run — any proposal shape works; the target is never reached (execution
+blocks before any file action), so reusing RB-06's proposal is fine:*
+```powershell
+python -c "from approval_gate import run_approval_gate; proposals=[{'action_type': 'delete_duplicate', 'target_path': r'C:\OneDrive-Agent_TestBed\denied.txt', 'reason': 'RB-09 targeted fallback exercise -- broken snapshot precondition (test target irrelevant, execution should block before reaching it)', 'details': {'keeper_path': r'C:\OneDrive-Agent_TestBed\report.txt', 'duplicate_path': r'C:\OneDrive-Agent_TestBed\denied.txt', 'size_bytes': 32}}]; result=run_approval_gate(proposals); print(result)"
+```
+
+*Expected:* console shows a `BLOCKED: Could not write pre-run
+snapshot...` error line and an `ALERT: Execution blocked — snapshot
+write failed` block — **no `PROPOSED ACTIONS — REVIEW REQUIRED` header,
+no approval prompt at all.** Final printed result:
+```
+{'status': 'blocked', 'reason': 'Snapshot write failed -- no actions executed.', 'succeeded': 0, 'failed': 0, 'skipped': 0}
+```
+
+*Post-run verification (confirm the existing snapshot content survived
+untouched — a failed `open(path, "w")` should never truncate):*
+```powershell
+Get-Content "pre_run_snapshot.json" -Raw
+```
+Should show whatever content existed *before* this run, unchanged.
+
+*Teardown — remove the deny ACL:*
+```powershell
+icacls "pre_run_snapshot.json" /remove:d "$env:USERNAME"
+```
+
+*Alert verification note (2026-07-19):* this run's alert was
+independently confirmed via a live Gmail search rather than a manual
+screenshot — subject `[OneDrive Agent] Execution blocked — snapshot
+write failed`. Useful for future verification: all OneDrive Agent
+alerts share the `[OneDrive Agent]` subject prefix, but
+**`_execute_delete`'s "Action failed — permission denied" alert is
+subject-line identical regardless of which file failed** (RB-05 and
+RB-06 alerts look the same in a subject-only search) — disambiguate by
+timestamp or the `Target:` line in the body, not the subject alone.
+
+*Record:* log the outcome as a new RAID entry and update the handoff
+document's outstanding-items list accordingly.
 
 ### RB-10 — Online-only / placeholder file *(secondary bed, under OneDrive)* — EXPLORATORY
 *Proves / investigates:* behaviour on a OneDrive placeholder (gap G3 — currently unhandled). A placeholder ("online-only") file shows in File Explorer but its content lives only in the cloud — on disk it is effectively a 0-byte stub, so an unguarded content-hash could (1) hash "nothing" and falsely group unrelated placeholders as duplicates, (2) trigger a hydration download, or (3) error. The purpose of this case is to **observe which happens** and then make a conscious handle-vs-accept decision.
@@ -475,7 +540,7 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 
 | Field | Value |
 |---|---|
-| Version | v2.3 |
+| Version | v2.4 |
 | Companion | `TEST_STRATEGY.md` (bidirectional reference); `GLOSSARY.md` (acronym register) |
 | Related | Backlog #6 / Phase 8; RAID R6, I5; gaps G1/G2/G3; handoff v8.0 (audit regime standing rule) |
 | Author of build recipe | Claude (drafted), under Nadeem's BA/PM direction (see §11) |
@@ -490,3 +555,4 @@ Recorded for portfolio visibility — the analytical direction on this artifact 
 | v2.1 | 2026-07-16 08:06 | §8.3 corrected: -Encoding UTF8 added to all three checkpoint exports (unicode-corruption defect found and fixed at CP1, 2026-07-15); hash-grouping command added; expected-output example added from the real CP1 baseline. Defect and fix recorded in RAID and handoff v8.2. |
 | v2.2 | 2026-07-19 | §8.3 corrected again: replaced the single hardcoded CP1 export example + prose "repeat with CP2/CP3" instruction with three explicit, individually-labeled export commands (CP1/CP2/CP3), each with its own filename spelled out. Fixes the defect behind Issue I11 (2026-07-19 live run): the old block was copied verbatim at CP3 and silently overwrote the CP1 baseline file. Defect and fix recorded in RAID (I11) and handoff (pending v8.4). |
 | v2.3 | 2026-07-19 | Added a new §5 subsection under RB-06 — "RB-06 fallback procedure — running it standalone" — the concrete, previously-missing steps for exercising RB-06 against an already-built, CP3-closed bed when a pilot run's keep-choice leaves `denied.txt` unexercised (as happened 2026-07-15 and 2026-07-19). Covers the pre-run ACL check, a `pre_run_snapshot.json` backup step, the exact hand-built single-proposal invocation, expected outcome, and post-run scope verification. No changes to core test cases, answer key, or the materiality rule. |
+| v2.4 | 2026-07-19 | Added a new §5 subsection under RB-09 — "RB-09 fallback procedure — running it standalone" — the concrete, live-tested steps for exercising RB-09 (broken-snapshot precondition): `icacls` deny-write setup, the finding that this case blocks before any approval prompt (no human input needed, unlike RB-06), expected outcome, a post-run content-survival check, teardown, and a Gmail-search alert-verification note (including a subject-line collision caveat between RB-05/RB-06 alerts). No changes to core test cases, answer key, or the materiality rule. |
