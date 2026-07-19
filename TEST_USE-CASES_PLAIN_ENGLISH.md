@@ -2,6 +2,8 @@
 
 **Companion to:** `TEST_BED_AND_CASES.md` (the technical build/execution recipe) and `TEST_STRATEGY.md` (the overall test plan). This document exists purely to make every test case readable by a non-technical reviewer — a recruiter, hiring manager, or interviewer — without needing to understand PowerShell commands or file hashes.
 
+**Acronyms:** expanded on first use per document and per major section; full register in [`GLOSSARY.md`](./GLOSSARY.md).
+
 **A note on the word "Agent":** throughout this project, "the OneDrive AI Agent" refers specifically to the Python-based, Claude-driven tool built for this project — not a call-centre agent, a logistics agent, or any other kind of "agent." This document always spells it out in full for that reason.
 
 **Case-ID prefixes:**
