@@ -1,0 +1,77 @@
+# Lessons Learned Register
+
+**Retroactively authored at project closure, 2026-07-20 06:12** (same session and dating convention as `PROJECT_CHARTER.md`, the Requirements Traceability Matrix, and the Stakeholder Register) — compiled from lessons that were actually captured live, in the Daily Scrum log's retrospective column (`BACKLOG.md`) and in RAID entries, at the point they happened. This document consolidates and cross-references that trail; it does not invent hindsight that wasn't recorded at the time.
+
+**Acronyms:** expanded on first use; full register in [`GLOSSARY.md`](./GLOSSARY.md).
+
+**A note on scope:** per the final closure decision (2026-07-20), this document also carries the project's **Scope Evolution & Change Log** as §3 below, folded in here rather than issued as a separate Project Plan document — there was no standing project plan to amend, and a full change-log accounting reads more honestly as part of the retrospective than as a freestanding artifact implying more formal change-control machinery existed than actually did.
+
+---
+
+## 1. What went well
+
+| # | Lesson | Evidence |
+|---|---|---|
+| 1 | **Independent, deterministic verification catches what self-review misses — including verification by another AI.** The Cowork peer review (2026-07-02) found a real, critical test-isolation bug the project's own suite was silently masking. But Cowork is *also* Claude — so for Phase 8, the gating verification layer was deliberately built on a non-AI, deterministic tool (`Get-FileHash`) instead, with Cowork demoted to advisory-only. The CP1/CP2/CP3 regime never had a single gating discrepancy across three checkpoints. | RAID I5; `TEST_BED_AND_CASES.md` §8.1; `PILOT_SIGNOFF_SUMMARY.md` §1 |
+| 2 | **Screenshot/content-verification, adopted early, prevented a recurrence of its own founding incident.** The placeholder-overwrite issue (I1) — a clean `git push` that actually contained wrong content — led directly to a standing rule (verify content, not just command success) that held for the rest of the project; no comparable incident recurred for the remainder of the project (2026-06-30 to 2026-07-20, ~3.5 weeks). | RAID I1, A1; `BACKLOG.md` 2026-06-29/30 Daily Scrum entry |
+| 3 | **Naming a recurring failure *pattern* once, rather than re-diagnosing each instance, compounds.** The sanity-check false-positive root-cause work (2026-07-03) explicitly generalized beyond this project — proactively recognizing "a root cause rediscovered across scenarios of the same process" as a category, not a one-off fix. | `BACKLOG.md` 2026-07-03 Daily Scrum entry |
+| 4 | **Reviewing cross-project suggestions rather than executing them at face value caught a real, confidently-wrong suggestion.** A parallel Claude Project session (without this project's code context) proposed four README refinements; one was factually incorrect about which script invokes the approval gate. All four were independently verified here before any file was touched. | `BACKLOG.md` 2026-07-04 Daily Scrum entry; `STAKEHOLDER_REGISTER.md` §1 |
+| 5 | **Disclosing an unproven mechanism honestly, rather than rounding a partial result up to a clean pass, is itself a stronger deliverable.** RB-13's originally-specified mechanism (state-file resume) was found not wired into the live path — this was stated plainly, the property that actually mattered was verified by a different, genuine method instead, and the gap was tracked forward (Backlog #10) rather than hidden. This is arguably the single strongest piece of evidence in the whole repo that the "no overclaiming" objective (`PROJECT_CHARTER.md` §2) was real, not aspirational. | RAID I16, R1; `PILOT_SIGNOFF_SUMMARY.md` §3 |
+| 6 | **A deliberately solo stakeholder analysis still surfaced a real internal tension worth naming.** Separating Nadeem's Sponsor/PM/BA roles, even nominally, made visible a real pull between "the Sponsor wants this to look complete" and "the BA insists a limitation gets disclosed anyway" — and the BA view won every time it mattered (A10, RB-10, RB-13 all disclosed rather than smoothed over). | `STAKEHOLDER_REGISTER.md` §3 |
+
+## 2. What would be done differently
+
+| # | Lesson | Evidence | Change made / carried forward |
+|---|---|---|---|
+| 1 | **Test code needs the same hermeticity discipline as production code.** Two separate incidents (I5: tests destructively operating on real fixtures; I6: tests sending real emails to a live recipient list) shared one root cause — a test exercising a real side effect (filesystem, network) that stayed invisible until run in the specific environment where the side effect could fire. | RAID I5, I6 | Fixture isolation via `tempfile`/`shutil.copytree`; `SENDGRID_API_KEY` cleared at test-suite start. New standing rule: no real filesystem, network, or credentials in automated tests. |
+| 2 | **A secret can leak through an interactive shell even when the code that "removes" it is correct.** `os.environ.pop("SENDGRID_API_KEY", None)` is safe in a script; run interactively, the REPL echoed the popped value as the expression's return value, exposing it in a chat transcript. | RAID I7 | Key rotated same day. Standing rule: never let a secret be the last evaluated expression in an interactive session. |
+| 3 | **A single reusable export-command template, copied by hand at each checkpoint, is a defect waiting to happen.** `TEST_BED_AND_CASES.md`'s original §8.3 gave one example export command with a prose "repeat for CP2/CP3" instruction; copying it verbatim at CP3 silently overwrote the CP1 baseline file. | RAID I11 | Spec corrected (v2.2) to three explicit, individually-labeled export commands, no copy-and-edit step required. The original CP1 file itself was not recoverable — CP2 (independently proven identical to CP1 two days earlier) stands in permanently. A real, disclosed limitation in the pilot's evidence trail, not hidden. |
+| 4 | **A model's own non-determinism can leave a planned test case unexercised without anyone deciding that.** RB-06 relies on the model choosing to propose `denied.txt` for deletion; on both the dry run and the live run, its keep-choice for the duplicate group landed elsewhere, so RB-06 was never naturally triggered. | RAID I12 | Standalone, targeted fallback procedures written for RB-06 and (for an unrelated, structural reason) RB-09 — documented in `TEST_BED_AND_CASES.md` v2.3/v2.4 as a repeatable pattern, not a one-off workaround. Lesson generalizes: a test case that depends on non-deterministic agent behaviour needs either a forcing mechanism or a documented fallback from the start, not discovered mid-pilot. |
+| 5 | **A structural integration gap between two phases can hide behind a passing unit test indefinitely.** `resilience.py`'s state machine (Phase 4.5) was correctly unit-tested in isolation from day one, which made "Closed — implemented and verified" a reasonable-looking status for months — but no live-runnable script ever actually called it. Only RB-13's live investigation surfaced this. | RAID I16, R1 | R1 reopened from Closed to Monitoring, precisely re-scoped rather than left at its old, now-inaccurate status. Lesson generalizes beyond this project: a unit test proves a function works; it does not prove the function is ever called by the code path a user actually runs. Wiring tracked as Backlog #10. |
+| 6 | **Backgrounded processes in this tooling environment don't reliably survive across separate tool-call invocations.** Discovered mid-investigation (during RB-13) when a process started in one call had died by the next. | Noted in RB-11's write-up (RAID I17) | Lock-holding and the check that depends on it were restructured into a single script/tool call rather than split across two, for RB-11 and any future case with the same shape. |
+
+## 3. Scope Evolution & Change Log
+
+Stated precisely because "scope creep" is a specific claim (uncontrolled, unapproved expansion) that does not match what actually happened here. This section gives the full, honest accounting so that judgement, not the label, is what a reviewer relies on.
+
+### 3.1 Original scope (baseline)
+
+`PROJECT_CHARTER.md` §4 states the in-scope/out-of-scope boundary as understood at the point of charter authorship. The project's actual original scope was never written down as a formal baseline document at day one (§4's own limitation, honestly disclosed there) — but it is reconstructable from the earliest handoff document versions and the Phase 1–7 build sequence, and §4 reflects that reconstruction faithfully, not a rewritten-after-the-fact version.
+
+### 3.2 Governed deferrals (not scope creep)
+
+Items identified as real, sometimes newly-discovered, work — and deliberately **not** actioned mid-pilot, tracked instead as explicit post-pilot backlog items:
+
+| Item | Discovered | Deferral reason | Status at closure |
+|---|---|---|---|
+| Backlog #7 — CLI folder argument | 2026-07-15 (pilot dry-run) | No code changes mid-pilot | Open, post-pilot |
+| Backlog #9 — online-only placeholder handling (Option C ratified) | 2026-07-19 (RB-10) | Correctness unaffected; UX/bandwidth enhancement, not a defect fix | Ratified — Planned (post-pilot) |
+| Backlog #10 — wire state-machine persistence into the live path | 2026-07-19 (RB-13, RAID I16) | Practical safety property already proven (I16); this closes a proof-mechanism gap, not a safety gap | Open, post-pilot |
+| Backlog #11 — diagnostic logging on hash-read skip | 2026-07-19 (RB-11, RAID I17) | Low priority, UX polish; underlying safety property already proven (I17) | Open, post-pilot |
+
+This is the textbook opposite of scope creep: each item was surfaced, evaluated, and **consciously excluded** from the current delivery rather than silently absorbed into it. A governed backlog of known, disclosed, deliberately-deferred work is a sign of scope discipline, not its absence.
+
+### 3.3 One approved addition
+
+**Backlog #12 — executive project summary** (raised and actioned 2026-07-19) is the one item that added new deliverable scope during the project's life (a recruiter-facing summary document, not originally part of the Phase 1–8 build plan). It is recorded here as exactly that: a single, explicitly-approved addition, delivered same-day, not backdated or reframed as having been in scope from the start.
+
+### 3.4 Reaffirmed, not new: the two-bed test design
+
+The secondary OneDrive test bed (for RB-08 and RB-10) is sometimes misread as scope discovered mid-pilot. It was not: `TEST_BED_AND_CASES.md` specified the two-bed design from **v1.0 (2026-07-05)**, and it was explicitly reviewed and reaffirmed unchanged on **2026-07-09**, after the local OneDrive environment changed — before Phase 8 execution began on 2026-07-15. Citing this as scope creep would be a factual error about the document history, not a legitimate methodology critique; recorded here precisely so that claim doesn't propagate uncorrected.
+
+### 3.5 Execution-path adjustments (not scope changes)
+
+The standalone fallback procedures for RB-06, RB-09, and (with minor substitution) RB-11 changed **how** a planned test case was exercised, not **what** was in scope — the cases themselves were specified from the original test design (`TEST_BED_AND_CASES.md` v1.0/v2.0). See §2, item 4 above and `PROJECT_REQUIREMENTS_TRACEABILITY_MATRIX.md` §4 for the corresponding requirements-traceability framing of the same distinction.
+
+### 3.6 Net assessment
+
+Across the full delivery: **zero instances of uncontrolled scope expansion**, **four governed deferrals** (tracked, reasoned, not silently dropped), and **one approved, same-day-delivered addition**. The project's scope discipline is evidenced by the backlog and RAID trail existing and being dated in real time — not asserted here for the first time at closure.
+
+---
+
+## 4. Closing note
+
+None of the lessons above are dramatic; that is itself the intended signal. The recurring pattern across nearly every entry in §2 is the same one named explicitly in §1, item 3: a failure mode gets caught once, root-caused honestly, generalized where it applies beyond the single instance, and tracked forward rather than quietly patched and forgotten. That discipline, applied consistently from Issue I1 in the project's first week through RB-13 in its last, is the actual portfolio artifact — the OneDrive clean-up agent is the vehicle it happens to be demonstrated on.
+
+---
+*Companion artifacts: `PROJECT_CHARTER.md`, `PROJECT_REQUIREMENTS_TRACEABILITY_MATRIX.md`, `STAKEHOLDER_REGISTER.md`, `PILOT_SIGNOFF_SUMMARY.md`, `RAID_LOG.md`, `BACKLOG.md`.*
