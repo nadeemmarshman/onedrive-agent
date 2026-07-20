@@ -2,7 +2,7 @@
 
 **Project:** OneDrive Cleanup Agent (OneDrive AI Agent) — `github.com/nadeemmarshman/onedrive-agent`
 **Pilot dates:** 2026-07-15 – 2026-07-19
-**Prepared by:** Claude Code, under Nadeem Abdullah's (BA/PM) direction
+**Prepared by:** Claude Code, under Nadeem Marshman's (BA/PM) direction
 **Status: PASS — recommended for sign-off**, with explicitly disclosed limitations (§4) carried forward as post-pilot work, none of which affect the safety guarantees this pilot exists to prove.
 
 ---

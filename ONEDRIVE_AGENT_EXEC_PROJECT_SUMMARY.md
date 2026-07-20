@@ -1,7 +1,7 @@
 # OneDrive Cleanup Agent (OneDrive AI Agent) — Executive Project Summary
 
 **Repo:** `github.com/nadeemmarshman/onedrive-agent` (public)
-**Prepared by:** Claude Code, under Nadeem Abdullah's (Business Analyst / Project Manager, BA/PM) direction
+**Prepared by:** Claude Code, under Nadeem Marshman's (Business Analyst / Project Manager, BA/PM) direction
 **Acronyms:** expanded on first use; full register in [`GLOSSARY.md`](./GLOSSARY.md).
 
 ---
