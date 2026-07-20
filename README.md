@@ -296,6 +296,16 @@ than assume, and catch problems before they compound.
   plain-English user story, for a non-technical reviewer
 - `PILOT_SIGNOFF_SUMMARY.md` — one-page Phase 8 pilot sign-off summary:
   checkpoint results, defects found/fixed, and honest coverage disclosure
+- `ONEDRIVE_AGENT_EXEC_PROJECT_SUMMARY.md` / `.docx` — recruiter-facing
+  executive summary of the whole project, not just Phase 8
+- `PROJECT_CHARTER.md` — retroactively authored project charter (purpose,
+  objectives, scope, stakeholders, methodology), dated honestly at closure
+- `PROJECT_REQUIREMENTS_TRACEABILITY_MATRIX.md` — every requirement traced
+  from charter objective through GB/RB test case to sign-off evidence
+- `STAKEHOLDER_REGISTER.md` — who had a stake in the project and how they
+  were actually engaged
+- `LESSONS_LEARNED.md` — retrospective (what went well / what would be done
+  differently), including the folded Scope Evolution & Change Log
 - `architecture.svg` — architecture diagram (rendered inline above)
 - `LICENSE` — MIT licence
 - `sample_data/` — disposable test folder with planted edge cases
