@@ -37,7 +37,7 @@ The technical build is validated the way an engineer would; the *process* is gov
 - **"No snapshot, no actions"** — a pre-run audit manifest (path, size, MD5 hash per affected file) is a hard precondition for any destructive action, not an optional extra
 - **Independent, deterministic audit trail for the pilot** — Phase 8's checkpoints (below) were verified against `Get-FileHash`, a separate non-AI tool, specifically because Claude auditing Claude would be correlated evidence, not independent evidence
 
-## Phase 8: User Acceptance Testing / Pilot (UAT/Pilot) — test execution complete, sign-off pending
+## Phase 8: User Acceptance Testing / Pilot (UAT/Pilot) — complete, signed off 2026-07-20
 
 Phase 8 deliberately validates the already-built, already-tested OneDrive AI Agent against real conditions immediately before rollout — distinct from a Proof of Concept, which Phases 1–4 already covered against synthetic data.
 

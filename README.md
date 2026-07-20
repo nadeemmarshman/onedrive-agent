@@ -108,7 +108,7 @@ unconsidered gap (see BACKLOG.md item #5).
 | 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
 | 6 | Polish — full README, architecture diagram, repo public | ✅ Complete |
 | 7 | Comparison against Claude Cowork (Anthropic's own production agentic tool) — evaluate the hand-built OneDrive AI Agent against a finished product | ✅ Complete |
-| 8 | UAT / Pilot — validate the OneDrive AI Agent against a real, limited subset of live OneDrive data before full production rollout | ✅ Test execution complete — sign-off pending |
+| 8 | UAT / Pilot — validate the OneDrive AI Agent against a real, limited subset of live OneDrive data before full production rollout | ✅ Complete — signed off 2026-07-20 |
 
 ---
 
@@ -124,7 +124,7 @@ framing than with this project's own phase numbering:
 | Design | Phase 2 | `tool_contracts.py` (interface/technical design) |
 | Development | Phases 3, 4, 4.5, 5 | `decision_loop.py`, `agent_loop.py`, `resilience.py`, `approval_gate.py` |
 | Testing / QA | Pre-Phase-5 gate, `test_phase2.py`, `test_phase3_4_45.py`, Phase 7 (Cowork as independent validation) | Test suites, `docs/REMEDIATION_2026-07-02_cowork-peer-review.md` |
-| **UAT / Pilot** | **Phase 8 (test execution complete, sign-off pending)** | Validation against a real, limited OneDrive subset before full rollout — see `PILOT_SIGNOFF_SUMMARY.md` |
+| **UAT / Pilot** | **Phase 8 (complete — signed off 2026-07-20)** | Validation against a real, limited OneDrive subset before full rollout — see `PILOT_SIGNOFF_SUMMARY.md` |
 | Deployment | Full OneDrive rollout (future) | — |
 | Maintenance | Ongoing | `BACKLOG.md`, `RAID_LOG.md` |
 
@@ -263,17 +263,17 @@ than assume, and catch problems before they compound.
   OneDrive AI Agent's own model also switched from `claude-sonnet-4-6` to
   `claude-sonnet-5` to align with Claude Chat/Cowork (see handoff document
   Decision log).
-- ✅ **Phase 8 test execution complete (2026-07-19) — sign-off pending:**
-  UAT/Pilot against a real, limited OneDrive subset. All 19 green-line/
-  red-line test cases closed, three independently-verified checkpoints
-  (CP1/CP2/CP3) passed, and the pilot's most safety-critical property —
-  no unapproved execution after an unplanned crash — verified empirically.
-  One finding disclosed honestly rather than rounded up: the crash-recovery
-  test's originally-specified mechanism (saved-state resume) was found not
-  to be wired into the live code path; the behavioural safety guarantee is
-  proven, the specific resume mechanism is not yet live (tracked as a
-  post-pilot item). `PILOT_SIGNOFF_SUMMARY.md` (full detail) recommends
-  sign-off; that decision has not yet formally been made.
+- ✅ **Phase 8 complete — signed off 2026-07-20 (test execution completed
+  2026-07-19):** UAT/Pilot against a real, limited OneDrive subset. All 19
+  green-line/red-line test cases closed, three independently-verified
+  checkpoints (CP1/CP2/CP3) passed, and the pilot's most safety-critical
+  property — no unapproved execution after an unplanned crash — verified
+  empirically. One finding disclosed honestly rather than rounded up: the
+  crash-recovery test's originally-specified mechanism (saved-state resume)
+  was found not to be wired into the live code path; the behavioural safety
+  guarantee is proven, the specific resume mechanism is not yet live
+  (tracked as a post-pilot item). `PILOT_SIGNOFF_SUMMARY.md` (full detail)
+  recommended sign-off — Nadeem Marshman formally gave it, 2026-07-20 05:46.
 
 ---
 

@@ -3,7 +3,7 @@
 **Project:** OneDrive Cleanup Agent (OneDrive AI Agent) — `github.com/nadeemmarshman/onedrive-agent`
 **Pilot dates:** 2026-07-15 – 2026-07-19
 **Prepared by:** Claude Code, under Nadeem Marshman's (BA/PM) direction
-**Status: PASS — recommended for sign-off**, with explicitly disclosed limitations (§4) carried forward as post-pilot work, none of which affect the safety guarantees this pilot exists to prove.
+**Status: PASS — SIGNED OFF** by Nadeem Marshman, 2026-07-20 05:46, with explicitly disclosed limitations (§4) carried forward as post-pilot work, none of which affect the safety guarantees this pilot exists to prove.
 
 ---
 
@@ -49,6 +49,8 @@ Three cases (RB-06, RB-09, RB-11) required standalone targeted fallback runs, se
 ## 5. Recommendation
 
 **Sign off on Phase 8.** All safety-critical guarantees this pilot exists to prove — human approval required before any destructive action, graceful failure handling, no unapproved execution after an interruption, a governed and independently-auditable change-control trail — are proven, live, with genuine evidence (not self-attestation). The limitations above are real, disclosed precisely rather than glossed over, and none of them undermine those guarantees. Full detail in `RAID_LOG.md` (R1, R6, I9–I17) and `BACKLOG.md` (#7–#11).
+
+**This recommendation was accepted: Nadeem Marshman formally signed off on Phase 8 on 2026-07-20 at 05:46.**
 
 ---
 *Full evidence trail: `RAID_LOG.md`, `BACKLOG.md`, `TEST_BED_AND_CASES.md` v2.4, `AI-Agent-Build-Handoff_v9.1.md`. All commits referenced above are live-verified on GitHub.*
