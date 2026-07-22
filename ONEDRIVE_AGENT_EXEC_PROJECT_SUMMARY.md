@@ -23,7 +23,7 @@ Seven build phases, each proving a piece of the standard agent loop — **tool d
 | 4.5 | Resilience — email alerting and a state machine designed for restart-and-resume after an abrupt stop (e.g. load shedding) |
 | 5 | The human-approval gate — nothing destructive executes without a pre-run audit snapshot and per-item explicit approval |
 | 6 | Polish — README, architecture diagram, public repo |
-| 7 | Independent comparison against Claude Cowork (Anthropic's own production agentic tool) — same findings on every test case, validating the hand-built OneDrive AI Agent's core logic; Cowork has no visible equivalent of the governance layer (audit trail, alerting, state-machine resilience) |
+| 7 | Independent comparison against Claude Cowork (Anthropic's own production agentic tool) — same findings on every test case, validating this directed OneDrive AI Agent build's core logic; Cowork has no visible equivalent of the governance layer (audit trail, alerting, state-machine resilience) |
 
 Full phase-by-phase detail: `README.md`.
 
