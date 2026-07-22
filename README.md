@@ -107,7 +107,7 @@ unconsidered gap (see BACKLOG.md item #5).
 | 4.5 | Resilience & Alerting — SendGrid email alerts (5W incident framework), state machine with restart-and-resume for load-shedding resilience | ✅ Complete |
 | 5 | Human-approval gate — pre-run manifest snapshot, full proposal review, per-item approve/reject | ✅ Complete |
 | 6 | Polish — full README, architecture diagram, repo public | ✅ Complete |
-| 7 | Comparison against Claude Cowork (Anthropic's own production agentic tool) — evaluate the hand-built OneDrive AI Agent against a finished product | ✅ Complete |
+| 7 | Comparison against Claude Cowork (Anthropic's own production agentic tool) — evaluate this self-directed OneDrive AI Agent build against a finished product | ✅ Complete |
 | 8 | UAT / Pilot — validate the OneDrive AI Agent against a real, limited subset of live OneDrive data before full production rollout | ✅ Complete — signed off 2026-07-20 |
 
 ---
@@ -353,10 +353,10 @@ User-level environment variables (see README table above for setup).
 
 ## Comparison against Claude Cowork
 
-**What this is:** After building the OneDrive AI Agent by hand, the same file-organisation
+**What this is:** After directing the build of the OneDrive AI Agent, the same file-organisation
 task was given to Claude Cowork — Anthropic's own production-grade agentic
 tool — on the same controlled test data (`sample_data/`). The goal: evaluate
-how the hand-built version compares to a finished product built on the same
+how this directed build compares to a finished product built on the same
 underlying loop, and identify what each does that the other doesn't.
 
 **Models used:**
@@ -422,10 +422,10 @@ rename `original_notes_v2.txt` to something clearer (e.g.
 
 **On findings:** Cowork reached the same conclusions on every test case —
 same duplicate identified, same near-miss correctly excluded, same conversion
-candidate flagged. The core OneDrive AI Agent logic in the hand-built version is validated
+candidate flagged. The core OneDrive AI Agent logic in this governed build is validated
 against a production tool.
 
-**On governance:** Where the hand-built version differs from Cowork is not
+**On governance:** Where this directed build differs from Cowork is not
 in *what* it finds, but in *how it governs* what it does with those findings.
 The explicit audit trail, structured logging, email alerting on failure, and
 state-machine resilience for power outages are deliberate engineering choices
@@ -433,13 +433,13 @@ with stated reasons — none of these are visible in Cowork's output. This
 reflects the BA/PM framing of the project: the governance layer is as
 important as the functional output.
 
-**On transparency:** Building the OneDrive AI Agent by hand makes the underlying
+**On transparency:** Directing the OneDrive AI Agent's build end-to-end makes the underlying
 mechanics inspectable. Cowork is a polished, production-capable tool;
-the hand-built version is a learning and demonstration artefact. Both
+this directed build is a learning and demonstration artefact. Both
 are useful — for different purposes.
 
 **On scope:** Cowork's proactive rename suggestion shows one area where
 a production tool adds value beyond the defined task — general-purpose
-reasoning applied opportunistically. The hand-built OneDrive AI Agent only does what
+reasoning applied opportunistically. This BA/PM-directed OneDrive AI Agent only does what
 it was explicitly designed to do, which is appropriate for a controlled,
 governed pipeline but less flexible than a general-purpose agent.
