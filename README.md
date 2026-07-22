@@ -360,7 +360,7 @@ how this directed build compares to a finished product built on the same
 underlying loop, and identify what each does that the other doesn't.
 
 **Models used:**
-- Hand-built OneDrive AI Agent (Phases 3–5, as originally built and tested): `claude-sonnet-4-6`
+- This directed OneDrive AI Agent build (Phases 3–5, as originally built and tested): `claude-sonnet-4-6`
   (released February 2026) — chosen at the time because it was accessible on
   the free tier during an early, budget-constrained phase of this project
 - Claude Cowork (Phase 7): `claude-sonnet-5` (released June 30, 2026 — the
@@ -404,7 +404,7 @@ rename `original_notes_v2.txt` to something clearer (e.g.
 
 ### Comparison
 
-| Dimension | Hand-built OneDrive AI Agent | Claude Cowork |
+| Dimension | This directed OneDrive AI Agent build | Claude Cowork |
 |---|---|---|
 | Model | `claude-sonnet-4-6` | `claude-sonnet-5` (Sonnet 5, released 2026-06-30) |
 | Duplicate detection | MD5 content hash via Python | MD5 content hash via file inspection |
