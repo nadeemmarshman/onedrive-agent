@@ -27,4 +27,7 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Claude Code local permissions -- machine-specific, never versioned.
+.claude/settings.local.json
+
 pre_run_snapshot.json
