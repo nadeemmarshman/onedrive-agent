@@ -48,7 +48,9 @@
 
 ## Who I am / context
 
-{{owner}} — hybrid Business Analyst / IT Project Manager based in Johannesburg, South Africa. Targeting both BA and PM roles. Currently unemployed and job hunting. Background includes First National Bank (BA-focused), NCR Atleos/Altron (PM-focused), Agile delivery, payments systems, stakeholder management. Holds a Business Analysis Diploma. Delivery experience is practitioner-led and Agile-native (corrected 27 July 2026: no PSM I or other Scrum.org credential is held — see `CLAUDE.md`'s Résumé fact guardrails for the full correction).
+{{owner}} — Delivery Lead | Senior Business Analyst (locked title, corrected 27 July 2026 — was
+"hybrid Business Analyst / IT Project Manager," now retired), based in Johannesburg, South Africa.
+Targeting both BA and PM roles. Currently unemployed and job hunting. Background includes First National Bank (BA-focused), NCR Atleos/Altron (PM-focused), Agile delivery, payments systems, stakeholder management. Holds a Business Analysis Diploma. Delivery experience is practitioner-led and Agile-native (corrected 27 July 2026: no PSM I or other Scrum.org credential is held — see `CLAUDE.md`'s Résumé fact guardrails for the full correction).
 
 This Project ("Career Portfolio & Job Search") holds career portfolio work generally — resume drafting, job search tracking, and technical portfolio projects. This document covers one specific build within that Project.
 
