@@ -19,7 +19,7 @@ decision-making behind it is visible, not just the outcome.
 
 ## Why this project
 
-I'm a hybrid Business Analyst / IT Project Manager, not a software engineer
+I'm a Delivery Lead and Senior Business Analyst, not a software engineer
 by background. This project exists to give me a concrete technical artefact
 to point to — built with the same requirements → design → build →
 risk/governance discipline I'd bring to any BA/PM deliverable.
