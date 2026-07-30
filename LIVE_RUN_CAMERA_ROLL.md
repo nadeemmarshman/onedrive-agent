@@ -25,3 +25,19 @@ reorders each group so a plain-named file is preferred as keeper before
 calling `propose_action()`. See `PROPOSED_ACTIONS_CAMERA_ROLL.json` for the
 resulting proposal -- for human review only, nothing deleted.
 
+## Process change: quarantine instead of direct delete
+
+Direct deletion of the two real files was requested (2026-07-30) and
+declined -- permanent deletion is a prohibited action for this assistant
+regardless of user authorization. `quarantine_camera_roll_dedup.py` was
+added instead: it moves files identified as duplicates into a
+`_Duplicates_PendingDeletion` subfolder within the scanned folder, using
+the same keeper-selection logic as the proposal step. Moving is
+reversible (nothing destroyed), so it proceeds as a regular action; the
+final delete is left for {{owner}} to do himself, from the quarantine
+subfolder, whenever he's satisfied.
+
+Executed 2026-07-30: both files moved successfully, confirmed on disk --
+`_Duplicates_PendingDeletion\` now holds the two conflict copies, the two
+plain-named originals remain untouched in the main folder.
+
