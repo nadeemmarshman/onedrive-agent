@@ -274,6 +274,26 @@ than assume, and catch problems before they compound.
   guarantee is proven, the specific resume mechanism is not yet live
   (tracked as a post-pilot item). `PILOT_SIGNOFF_SUMMARY.md` (full detail)
   recommended sign-off — Nadeem Marshman formally gave it, 2026-07-20 05:46.
+- 🟢 **Live run (2026-07-30):** Phase 1's duplicate-detection tool run
+  unmodified against a real, live OneDrive folder (`Pictures\Camera Roll`,
+  218 files) rather than the disposable sample fixture. Found 2 true
+  byte-for-byte duplicate groups (MD5 content hash, not filename matching),
+  5.8 MB reclaimable. Read-only — no files deleted; see
+  `LIVE_RUN_CAMERA_ROLL.md` and `live_run_camera_roll_dedup.py`.
+
+---
+
+## Release phases (resume links)
+
+This repo is tagged at two points so the foundational build and the live
+exercise can be linked separately:
+
+- **[`v1.0-foundational-build`](../../releases/tag/v1.0-foundational-build)**
+  — Phases 1-8, closed 2026-07-20. The designed-and-governed build: agent
+  loop, tool contracts, approval gate, resilience layer, full BA/PM
+  artefact suite, pilot sign-off.
+- **[`v2.0-live-run-camera-roll`](../../releases/tag/v2.0-live-run-camera-roll)**
+  — the Phase 1 tool run live against real data, 2026-07-30.
 
 ---
 
