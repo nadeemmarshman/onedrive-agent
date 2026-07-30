@@ -285,15 +285,22 @@ than assume, and catch problems before they compound.
 
 ## Release phases (resume links)
 
-This repo is tagged at two points so the foundational build and the live
-exercise can be linked separately:
+This repo is tagged so each phase can be linked separately on a resume,
+rather than splitting into multiple repos:
 
 - **[`v1.0-foundational-build`](../../releases/tag/v1.0-foundational-build)**
   — Phases 1-8, closed 2026-07-20. The designed-and-governed build: agent
   loop, tool contracts, approval gate, resilience layer, full BA/PM
   artefact suite, pilot sign-off.
-- **[`v2.0-live-run-camera-roll`](../../releases/tag/v2.0-live-run-camera-roll)**
-  — the Phase 1 tool run live against real data, 2026-07-30.
+- **[`v2.1-live-run-camera-roll-complete`](../../releases/tag/v2.1-live-run-camera-roll-complete)**
+  — the Phase 1 tool run live against real data (`Pictures\Camera Roll`),
+  2026-07-30: keeper-selection defect found and worked around, proposal
+  drafted, quarantine-move workflow built and executed. This is the link
+  to use for this phase — `v2.0-live-run-camera-roll` is an earlier
+  in-phase checkpoint (first commit only), kept as-is rather than moved.
+  See `Handoff-Briefs/Live-Run-Handoff_v1.0.md` for full detail.
+- Further live-run phases against other folders will each get their own
+  `vN.0-live-run-<name>` tag following the same pattern.
 
 ---
 
