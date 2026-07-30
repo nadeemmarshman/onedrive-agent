@@ -1,0 +1,22 @@
+[
+  {
+    "action_type": "delete_duplicate",
+    "target_path": "IMG_20260326_123420 1.jpg",
+    "reason": "Identical content to 'IMG_20260326_123420.jpg'",
+    "details": {
+      "keeper_path": "IMG_20260326_123420.jpg",
+      "duplicate_path": "IMG_20260326_123420 1.jpg",
+      "size_bytes": 4730652
+    }
+  },
+  {
+    "action_type": "delete_duplicate",
+    "target_path": "IMG_20260713_153505 1.jpg",
+    "reason": "Identical content to 'IMG_20260713_153505.jpg'",
+    "details": {
+      "keeper_path": "IMG_20260713_153505.jpg",
+      "duplicate_path": "IMG_20260713_153505 1.jpg",
+      "size_bytes": 1349326
+    }
+  }
+]
