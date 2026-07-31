@@ -10,35 +10,24 @@ assistant regardless of user authorization. Moving files is reversible
 regular action. The user does the final delete themselves, from the
 quarantine subfolder, once satisfied.
 
-Reuses find_duplicates() (byte-for-byte MD5) and the same keeper-selection
-fix as propose_camera_roll_dedup.py: a plain-named file is preferred as
-keeper over a " 1"/" 2"-suffixed OneDrive sync-conflict copy.
+Reuses find_duplicates() (byte-for-byte MD5) and the shared
+keeper-selection fix in dedup_keeper.py: a plain-named file is preferred
+as keeper over a " 1"/"(1)"-suffixed OneDrive sync-conflict copy.
 """
 
 import shutil
 from pathlib import Path
 
 from tools import scan_folder, find_duplicates
+from dedup_keeper import reorder_keeper_first
 
 TARGET_FOLDER = r"C:\Users\Nadeem\OneDrive\Pictures\Camera Roll"
 QUARANTINE_SUBFOLDER_NAME = "_Duplicates_PendingDeletion"
 
 
-def _is_onedrive_conflict_copy(name: str) -> bool:
-    stem = name.rsplit(".", 1)[0]
-    parts = stem.rsplit(" ", 1)
-    return len(parts) == 2 and parts[1].isdigit()
-
-
-def _reorder_keeper_first(group: list[dict]) -> list[dict]:
-    plain = [f for f in group if not _is_onedrive_conflict_copy(f["name"])]
-    suffixed = [f for f in group if _is_onedrive_conflict_copy(f["name"])]
-    return (plain + suffixed) if plain else group
-
-
 def quarantine_duplicates(folder: str = TARGET_FOLDER) -> list[dict]:
     files = scan_folder(folder, recursive=True)
-    dup_groups = [_reorder_keeper_first(g) for g in find_duplicates(files)]
+    dup_groups = [reorder_keeper_first(g) for g in find_duplicates(files)]
 
     quarantine_dir = Path(folder) / QUARANTINE_SUBFOLDER_NAME
     quarantine_dir.mkdir(exist_ok=True)

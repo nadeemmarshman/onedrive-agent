@@ -10,32 +10,22 @@ function keeps group[0] as the "keeper" arbitrarily, which is wrong for
 OneDrive's own naming convention -- a " 1", " 2", etc. suffix before the
 extension marks a sync-conflict copy, not the original. Both duplicate
 groups here follow that pattern, so the keeper/duplicate choice is
-reordered accordingly before calling propose_action().
+reordered accordingly before calling propose_action(), via the shared
+dedup_keeper.py helper.
 """
 
 import json
 
 from tools import scan_folder, find_duplicates, propose_action
+from dedup_keeper import reorder_keeper_first
 
 TARGET_FOLDER = r"C:\Users\Nadeem\OneDrive\Pictures\Camera Roll"
-
-
-def _is_onedrive_conflict_copy(name: str) -> bool:
-    stem = name.rsplit(".", 1)[0]
-    parts = stem.rsplit(" ", 1)
-    return len(parts) == 2 and parts[1].isdigit()
-
-
-def _reorder_keeper_first(group: list[dict]) -> list[dict]:
-    plain = [f for f in group if not _is_onedrive_conflict_copy(f["name"])]
-    suffixed = [f for f in group if _is_onedrive_conflict_copy(f["name"])]
-    return (plain + suffixed) if plain else group
 
 
 def build_proposals(folder: str = TARGET_FOLDER) -> list[dict]:
     files = scan_folder(folder, recursive=True)
     dup_groups = find_duplicates(files)
-    reordered = [_reorder_keeper_first(g) for g in dup_groups]
+    reordered = [reorder_keeper_first(g) for g in dup_groups]
     proposals = propose_action(reordered, convertible_files=[])
 
     # Trim to filename only -- no full local paths committed to a public repo.
