@@ -54,3 +54,21 @@ _raw_local_only/
 
 # Local-only audit helpers, never committed.
 _audit_*.py
+
+# ---------------------------------------------------------------
+# Git bundles / history backups (added 2026-08-02, RAID I27)
+# ---------------------------------------------------------------
+# Pre-purge backup bundles contain the COMPLETE original history,
+# including every personal path and the ID-formatted number that were
+# deliberately purged from this repo. Committing one would silently undo
+# the entire remediation.
+#
+# The pre-commit guard CANNOT protect against this: bundle contents are
+# zlib-compressed, so text scanning sees nothing. Verified -- staging a
+# bundle full of the purged data returns "CLEAN". This ignore rule is the
+# only control.
+#
+# These backups should ideally live OUTSIDE the repository entirely.
+*.bundle
+*.pack
+PurgeGItHPrivateData/

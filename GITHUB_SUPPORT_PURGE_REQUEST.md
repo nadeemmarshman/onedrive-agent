@@ -1,7 +1,16 @@
 # GitHub Support — request to purge unreachable objects
 
-**Status:** v2.0, ready to send (2026-08-02). Must be submitted by {{owner}} —
-it has to come from the account owner.
+**Status: SENT by {{owner}}, 2026-08-02.** Awaiting GitHub Support's
+confirmation that the unreachable objects have been purged.
+
+**Outstanding on receipt:** record the ticket reference here and against
+RAID I27, then close the corresponding item in Backlog #18.
+
+**Ticket reference:** _(not yet recorded)_
+
+This file is retained as the governance record of exactly what was
+requested. Kept in the repository deliberately — it contains no personal
+data, only categories.
 
 **This is a web form, not an email address.**
 

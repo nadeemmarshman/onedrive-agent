@@ -51,11 +51,15 @@ rather than needing a follow-up if further commits are made.
 > request is incomplete and may need a follow-up message. Cost of waiting:
 > the window stays open for however long item 1 takes.
 
-- [ ] Send the drafted message in **`GITHUB_SUPPORT_PURGE_REQUEST.md`**
-      (must come from {{owner}} — it has to be the account owner).
-- [ ] Before sending: copy the pre-purge backup bundle out of the temp
-      directory somewhere durable, in case Support asks for full 40-character
-      SHAs that are no longer in the local clone.
+- [x] **SENT 2026-08-02.** Submitted by {{owner}} via the GitHub Support web
+      form. Sequencing changed from "after the duplication work" to "now",
+      agreeing with the independent audit that an open exposure window had
+      no technical reason to stay open.
+- [x] Backup bundles moved out of the temp directory by {{owner}}, into
+      `PurgeGItHPrivateData\`. **Note:** that folder sits inside the repo and
+      is now gitignored — the bundles hold the complete pre-purge history,
+      and the pre-commit guard cannot detect them (compressed, so text
+      scanning sees nothing). Moving them outside the repo would be safer.
 - [ ] After sending: record the ticket reference against RAID I27 and mark
       Backlog #18's outstanding item closed when Support confirms.
 
