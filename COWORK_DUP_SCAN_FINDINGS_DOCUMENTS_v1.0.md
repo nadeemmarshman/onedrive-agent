@@ -65,8 +65,8 @@ Full list of all 242 groups with suggested keeper vs delete paths: see companion
 
 | Artefact | Location |
 |---|---|
-| Full audit report (29+ pp, incl. proposed folder schema, naming conventions, Appendix A with all 242 groups) | `OneDrive\1. Documents\1. My Folders\00-Admin\2026-07-08_Repo-Audit_Report_v1.docx` |
-| Machine-readable duplicate groups | `OneDrive\1. Documents\1. My Folders\00-Admin\2026-07-08_Repo-Audit_Duplicate-Groups_v1.json` (identical content to the companion JSON in this repo) |
+| Full audit report (29+ pp, incl. proposed folder schema, naming conventions, Appendix A with all 242 groups) | `<ONEDRIVE_ROOT>\<DOCS>\<area>\<admin>\<audit-report>.docx` |
+| Machine-readable duplicate groups | `<ONEDRIVE_ROOT>\<DOCS>\<area>\<admin>\<audit-groups>.json` (identical content to the companion JSON in this repo) |
 | New folder created | `1. My Folders\00-Admin\` (approved via gate) |
 
 ## 8. Caveats for reconciliation

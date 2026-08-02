@@ -1,0 +1,6 @@
+#!/bin/sh
+# Blocks commits containing real personal data from the scanned OneDrive
+# folders. See check_staged_for_personal_data.py and RAID I27.
+#
+# Enable per clone with:  git config core.hooksPath .githooks
+python check_staged_for_personal_data.py || exit 1
