@@ -67,9 +67,16 @@ had **0 forks, 0 stars and 0 watchers**.
 
 **What I am requesting**
 
-Please **permanently remove the unreachable objects and any cached views**
-of the affected commits for this repository, so that they can no longer be
-retrieved by direct commit SHA or via any cached diff/blob URL.
+Please **permanently remove all unreachable objects for this repository**,
+so that no commit that is not reachable from a current branch or tag can be
+retrieved by SHA or via any cached diff/blob URL.
+
+I am deliberately phrasing this as "all unreachable objects" rather than a
+list of specific commits. The repository has undergone **multiple history
+rewrites** during remediation, and more than one working session has pushed
+to it, so I cannot guarantee an enumerated list is exhaustive. A
+scope-based purge avoids that problem entirely. The SHAs below are offered
+as supporting detail, not as the definition of the request.
 
 I understand that a force-push makes commits unreachable but does not
 immediately delete the underlying objects, and that they can remain
@@ -77,11 +84,12 @@ accessible by their SHA until garbage collection runs on your side. Given
 the nature of the data, I would like this done explicitly rather than
 waiting for routine GC.
 
-**Commit SHAs that contained the sensitive data**
+**Superseded (unreachable) commit SHAs, as far as I can identify them**
 
-These were rewritten and are no longer reachable. Two rounds of history
-rewriting were performed (the first remediation was found to be incomplete
-during a follow-up audit), so both sets are listed:
+These were rewritten and are no longer reachable. Three rounds of history
+rewriting occurred in total (the first remediation was found incomplete by a
+follow-up audit; a later session then squashed two commits), so all sets are
+listed:
 
 *Original commits that introduced the data:*
 - `ff98dcd6ad7fb0486c76154fb4110984234ce567`
@@ -94,11 +102,16 @@ same period, all of which contained some of the same data:*
 - `5ea447a`, `05c0e869d5ed8ea2c2c5a05047f504e14f004858`
 - `8c56950`, `73cd096`, `4004ce1`, `d67a005`
 
+Additionally superseded by a later rewrite:
+- `e2141c3`, `21ffa3e` — squashed into the commit below
+
 **Current, intended state of `main`**
 
-- `c6e9b72` — `PC Backup phase + privacy breach remediation`
+- `25249f8` — `Pre-commit personal-data guard + independent Cowork audit response`
 
-Everything reachable from `c6e9b72` has been verified clean.
+Everything reachable from `25249f8` has been verified clean: I scanned every
+blob in the full current history and found no occurrence of the sensitive
+data, and `git fsck` reports no unreachable objects locally.
 
 Please confirm once the objects have been purged, and let me know if you
 need any further detail or verification from me.
