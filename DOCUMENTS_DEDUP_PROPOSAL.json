@@ -1,0 +1,16 @@
+{
+  "files_scanned": 3084,
+  "duplicate_groups": 948,
+  "groups_count": 948,
+  "summary_by_pattern": {
+    "internal_duplicate_in_live_tree": {
+      "group_count": 13,
+      "redundant_bytes": 6477124
+    },
+    "docfolderbackup_vs_live": {
+      "group_count": 935,
+      "redundant_bytes": 3320827955
+    }
+  },
+  "total_redundant_bytes": 3327305079
+}
