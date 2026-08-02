@@ -175,10 +175,10 @@ Thank you,
 
 - **Copy the backup bundles somewhere durable before sending.** They are now
   the only remaining source of the old objects — everything has been
-  garbage-collected locally. Both sit in a temp directory that may be
-  cleared without warning:
-  - `%LOCALAPPDATA%\Temp\claude\onedrive-agent-prepurge-20260802-200740.bundle`
-  - `%LOCALAPPDATA%\Temp\claude\onedrive-agent-preIDpurge-20260802-213212.bundle`
+  garbage-collected locally. Relocated 2026-08-02 out of the temp directory and out of the
+  repository, to a drive that is neither cloud-synced nor agent-scanned:
+  - `D:\OneDrive-Agent-Backups\onedrive-agent-prepurge-20260802-200740.bundle`
+  - `D:\OneDrive-Agent-Backups\onedrive-agent-preIDpurge-20260802-213212.bundle`
 
   If Support asks for the remaining abbreviated SHAs in full, clone a bundle
   and read them:

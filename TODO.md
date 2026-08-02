@@ -55,11 +55,15 @@ rather than needing a follow-up if further commits are made.
       form. Sequencing changed from "after the duplication work" to "now",
       agreeing with the independent audit that an open exposure window had
       no technical reason to stay open.
-- [x] Backup bundles moved out of the temp directory by {{owner}}, into
-      `PurgeGItHPrivateData\`. **Note:** that folder sits inside the repo and
-      is now gitignored — the bundles hold the complete pre-purge history,
-      and the pre-commit guard cannot detect them (compressed, so text
-      scanning sees nothing). Moving them outside the repo would be safer.
+- [x] **Backup bundles relocated outside the repository, 2026-08-02.**
+      Now at `D:\OneDrive-Agent-Backups\`. They were briefly inside the
+      repo, which was a real hazard: they hold the complete pre-purge
+      history, and the pre-commit guard cannot see into them (compressed,
+      so text scanning returns CLEAN). `D:` is not cloud-synced, not
+      scanned by the agent, and does not consume OneDrive quota. Verified
+      before the originals were deleted: MD5-identical, `git bundle verify`
+      reports a complete history, and a test clone recovered 94 commits
+      including the purged ones.
 - [ ] After sending: record the ticket reference against RAID I27 and mark
       Backlog #18's outstanding item closed when Support confirms.
 
