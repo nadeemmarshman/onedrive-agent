@@ -31,3 +31,26 @@ Thumbs.db
 .claude/settings.local.json
 
 pre_run_snapshot.json
+
+# ---------------------------------------------------------------
+# Privacy: raw live-run scan output (added 2026-08-02)
+# ---------------------------------------------------------------
+# The live-run phases scan real personal folders. Raw scan output
+# contains the full path of every file scanned, which discloses --
+# by folder and filename alone -- employment dispute records,
+# firearm licence records, identity and estate documents, medical
+# scheme membership and third-party names. This repo is public.
+#
+# Sanitized, aggregate-only versions of these artefacts are
+# committed instead; see sanitize_repo_artifacts.py. These raw
+# files stay local.
+sanitize_mapping.json
+robocopy_backup_log.txt
+*_RAW.json
+*_DELTA_RAW.json
+
+# Pre-sanitisation originals, retained locally for reference only.
+_raw_local_only/
+
+# Local-only audit helpers, never committed.
+_audit_*.py

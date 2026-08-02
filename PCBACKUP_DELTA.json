@@ -1,0 +1,13 @@
+{
+  "live_root": "<redacted-path>",
+  "pcbackup_root": "<redacted-path>",
+  "total_files": 1070,
+  "total_bytes": 2978233560,
+  "duplicated_files": 1063,
+  "duplicated_bytes": 2974164010,
+  "unique_files": 7,
+  "unique_bytes": 4069550,
+  "unique_never_hydrated": 7,
+  "unique_file_list_count": 7,
+  "duplicate_file_list_count": 1063
+}
