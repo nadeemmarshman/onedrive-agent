@@ -43,6 +43,13 @@ Remaining in flight:
       `5 Certificates` documents both still have a stale duplicate sitting
       alongside the canonical copy — not auto-picked a second time. Worth a
       look whenever convenient, not blocking anything.
+- [ ] **`Unsorted\` (31 files) has never been triaged.** Cowork's report v2
+      states the de-duplication phase complete, and on the evidence scanned
+      it is — but 2 of the remaining 9 duplicate groups live inside
+      `Unsorted\`, which nobody has actually opened yet. "Complete" there is
+      a statement about what was scanned, not a guarantee about what's in a
+      folder no one has looked inside. Worth a look before treating the
+      count as final.
 
 ## 2. Then: send the GitHub Support purge request
 
