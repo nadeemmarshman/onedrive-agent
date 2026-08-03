@@ -163,13 +163,20 @@ survives independently on D:.
 **Scripts** — `analyze_pcbackup_delta.py`, `quarantine_pcbackup_wholesale.py`
 **Data** — `PCBACKUP_DELTA.json` (full per-file duplicate and unique lists)
 
-## Open item
+## Final delete (2026-08-03, by {{owner}})
 
-Final permanent delete of
-`OneDrive\_Duplicates_PendingDeletion\PC Backup\` (1,070 files, 2.77 GB).
+`_Duplicates_PendingDeletion\PC Backup\` (1,070 files, 2.84 GB decimal /
+2.77 GiB binary) permanently deleted via **OneDrive web**, per RAID I26's
+lesson from the DocFolderBackup phase — avoids local File Explorer's
+"Home" view, which has been observed serving a stale listing that omits
+script-created folders.
 
-Per RAID **I26**, delete via **OneDrive web** rather than local File
-Explorer: this folder was created by script, and Explorer's OneDrive
-"Home" view has been observed serving a stale listing that omits
-script-created folders entirely, causing repeated failed delete attempts
-in the previous phase.
+Verified before deleting: the details panel's own **Path** field read
+`My files > _Duplicates_PendingDeletion > PC Backup`, its **Activity**
+log showed "You moved PC Backup" (matching this phase's quarantine
+step), and its size (2.84 GB) matched the expected 2,840.3 MB exactly
+once the decimal-vs-binary GB unit difference was accounted for.
+
+Verified after deleting: folder absent from the local filesystem
+(`_Duplicates_PendingDeletion` now empty) and absent from OneDrive web.
+This closes the phase's last open item and RAID I26's second occurrence.

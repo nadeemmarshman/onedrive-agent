@@ -10,10 +10,9 @@ just "what happens next, and after what."
 
 Remaining in flight:
 
-- [ ] **Final delete of the PC Backup quarantine** —
-      `_Duplicates_PendingDeletion\PC Backup\` (1,070 files, 2.77 GB).
-      Delete via **OneDrive web**, not File Explorer (RAID I26: Explorer's
-      OneDrive "Home" view serves a stale listing for script-created folders).
+- [x] **PC Backup quarantine deleted, 2026-08-03.** 1,070 files, 2.84 GB
+      reclaimed via OneDrive web (RAID I26). Verified via the details
+      panel's Path/Activity/Size before deleting, and on-disk absence after.
 - [ ] **Reconcile the 6 suffixed `(from DocFolderBackup)` files** in the
       reload-notes folder — same name, genuinely different content, so both
       copies were kept. Decide which is current and drop the other.
