@@ -13,9 +13,12 @@ Remaining in flight:
 - [x] **PC Backup quarantine deleted, 2026-08-03.** 1,070 files, 2.84 GB
       reclaimed via OneDrive web (RAID I26). Verified via the details
       panel's Path/Activity/Size before deleting, and on-disk absence after.
-- [ ] **Reconcile the 6 suffixed `(from DocFolderBackup)` files** in the
-      reload-notes folder — same name, genuinely different content, so both
-      copies were kept. Decide which is current and drop the other.
+- [x] **6 suffixed `(from DocFolderBackup)` files reconciled, 2026-08-03.**
+      Compared by actual content (text similarity + diff, sheet/string
+      comparison), not just filename/date. All 6: backup dated 2025, live
+      dated Feb 2026, and every divergence was live *adding* material, never
+      contradicting the backup. Nothing to merge back — quarantined all 6 to
+      `_Duplicates_PendingDeletion\Reload_Notes_Superseded\`.
 - [ ] **Reconcile the 2 same-named CV versions** consolidated into one folder.
 - [ ] **Decide on the remaining survey findings** — the 19.58 GB incomplete
       Google Takeout export (parts 001/005/009 missing) and the 41.18 GB

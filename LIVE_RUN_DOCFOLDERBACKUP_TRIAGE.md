@@ -33,9 +33,28 @@ side by side:
 - `3.0 Detailed_<calibre-1>_<ammunition-brand> 168gr_N140_Reload (from DocFolderBackup).docx`
 - `<calibre-1> Reload Data (from DocFolderBackup).xlsx`
 
-**Still open:** {{owner}} should compare each pair and decide whether the
-backup version has anything worth merging in, then delete whichever
-copy isn't needed -- this wasn't guessed automatically.
+**Reconciled 2026-08-03.** All 6 pairs compared by actual content, not
+just filename/date -- `.docx` files via extracted document text
+(similarity ratio + diff of the differing spans), the `.xlsx` via sheet
+names and shared-string sets.
+
+Result was consistent across all 6, without exception:
+
+- Every backup copy is dated 2025; every live copy is dated **February
+  2026** -- the live tree kept moving after the backup snapshot
+- Content similarity ranged 82%-99%, and in every case the divergence was
+  the live version **adding** material (expanded explanations, extra
+  sections, more precise data) rather than contradicting or replacing the
+  backup with something unrelated
+- No pair showed the backup holding information absent from live
+
+Conclusion: this is one actively-evolving document per pair, not two
+diverging versions. Nothing worth merging back -- the live version
+already is the backup version, continued.
+
+All 6 backup copies quarantined (not deleted) to
+`_Duplicates_PendingDeletion\Reload_Notes_Superseded\`, same reversible
+pattern as the rest of this project. Final delete is {{owner}}'s call.
 
 ## Discard — 15 files quarantined (not deleted)
 
