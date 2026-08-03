@@ -1,0 +1,15 @@
+{
+  "_note": "Aggregate-only, per-file entries removed before publication. Full 266-group detail with real paths in _raw_local_only/DOCUMENTS_DEDUP_PROPOSAL_20260803.json (gitignored). See DOCUMENTS_DEDUP_RESCAN_20260803.md and RAID I28.",
+  "scan_date": "2026-08-03",
+  "post_classifier_fix": true,
+  "files_scanned": 1933,
+  "duplicate_groups": 266,
+  "entries_removed": 266,
+  "summary_by_pattern": {
+    "internal_duplicate_in_live_tree": {
+      "group_count": 266,
+      "redundant_bytes": 619575684
+    }
+  },
+  "total_redundant_bytes": 619575684
+}

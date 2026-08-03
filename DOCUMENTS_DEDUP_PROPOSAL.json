@@ -1,4 +1,5 @@
 {
+  "_note": "Original 2026-07-31 scan, kept as the historical record of what triggered the DocFolderBackup phase. Its docfolderbackup_vs_live figure is now known to have been under-reporting live-tree redundancy -- see RAID I28 and DOCUMENTS_DEDUP_RESCAN_20260803.json for the corrected picture after the classifier fix.",
   "files_scanned": 3084,
   "duplicate_groups": 948,
   "groups_count": 948,
