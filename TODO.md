@@ -29,16 +29,20 @@ Remaining in flight:
 - [ ] **Decide on the remaining survey findings** — the 19.58 GB incomplete
       Google Takeout export (parts 001/005/009 missing) and the 41.18 GB
       Videos folder (no duplication found; an archival decision, not a dedup one).
-- [ ] **RAID I28/I29 — final permanent delete of `_Duplicates_PendingDeletion\
-      Internal_Duplicates_20260803\`** (315 files, ~578.3 MB, after the
-      2026-08-03 orphan restore). **Gate passed**: `verify_dedup_invariants.py`
-      confirms 0 orphaned groups. Not yet deleted — {{owner}}'s call, same as
-      every other delete in this project. Two things worth deciding first,
-      not blocking: the 6 `(from DocFolderBackup)` reload-notes pairs and
-      21 restored `5 Certificates` documents both now have a stale duplicate
-      sitting alongside the canonical copy, deliberately left unresolved
-      rather than auto-picked a second time — worth a look before or after
-      the delete, your call.
+- [x] **RAID I28/I29 — final permanent delete of `_Duplicates_PendingDeletion\
+      Internal_Duplicates_20260803\`, done 2026-08-03.** 315 files, ~578.3 MB,
+      deleted by {{owner}} via OneDrive web. Plus several further same-day
+      quarantine-then-delete rounds: `Trash` (fixed-term-contract email +
+      PDF, PDF relocated to its correct folder first), `ArchiveToDelete`'s
+      old resume drafts, an already-empty `Bank Statements(Esther` shell,
+      and the already-caught `edX_files` cache duplicate. Re-ran
+      `verify_dedup_invariants.py` after all deletes: **0 orphaned groups**,
+      confirmed. Both RAID I28 and I29 closed.
+- [ ] **Two stale-duplicate pairs, deliberately left unresolved.** The 6
+      `(from DocFolderBackup)` reload-notes pairs and 21 restored
+      `5 Certificates` documents both still have a stale duplicate sitting
+      alongside the canonical copy — not auto-picked a second time. Worth a
+      look whenever convenient, not blocking anything.
 
 ## 2. Then: send the GitHub Support purge request
 
