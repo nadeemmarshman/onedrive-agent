@@ -1,0 +1,7 @@
+{
+ "source": "Cowork scan 2026-07-08, re-verified against live disk 2026-08-03",
+ "unresolved_groups": 238,
+ "reclaimable_bytes": 606173717,
+ "entries_removed": 238,
+ "note": "per-file entries removed before publication; unredacted copy in _raw_local_only/ (gitignored)"
+}
