@@ -29,6 +29,16 @@ Remaining in flight:
 - [ ] **Decide on the remaining survey findings** — the 19.58 GB incomplete
       Google Takeout export (parts 001/005/009 missing) and the 41.18 GB
       Videos folder (no duplication found; an archival decision, not a dedup one).
+- [ ] **RAID I28/I29 — final permanent delete of `_Duplicates_PendingDeletion\
+      Internal_Duplicates_20260803\`** (315 files, ~578.3 MB, after the
+      2026-08-03 orphan restore). **Gate passed**: `verify_dedup_invariants.py`
+      confirms 0 orphaned groups. Not yet deleted — {{owner}}'s call, same as
+      every other delete in this project. Two things worth deciding first,
+      not blocking: the 6 `(from DocFolderBackup)` reload-notes pairs and
+      21 restored `5 Certificates` documents both now have a stale duplicate
+      sitting alongside the canonical copy, deliberately left unresolved
+      rather than auto-picked a second time — worth a look before or after
+      the delete, your call.
 
 ## 2. Then: send the GitHub Support purge request
 

@@ -160,6 +160,23 @@ def staged_additions() -> list[tuple[str, int, str]]:
     return out
 
 
+def _mask_placeholders(text: str) -> str:
+    """Blank out every <...> placeholder span before token-matching.
+
+    Without this, a mapped token that is only a SUBSTRING of an existing,
+    already-correct placeholder still matches -- the same ambiguous-
+    substring class documented in sanitize_mapping.json's own comment (the
+    "Bytes" -> size_bytes incident), rediscovered independently here: a
+    common English word that happens to be mapped (because it is also a
+    sensitive folder name) matched inside its own correctly-generated
+    placeholder, in an otherwise fully sanitised document, because the
+    guard searched the raw line instead of the line with placeholders
+    already removed. Deliberately not named here -- see test_personal_data_guard.py
+    for a synthetic worked example instead of the real token.
+    """
+    return PLACEHOLDER.sub(lambda m: " " * len(m.group(0)), text)
+
+
 def load_tokens() -> list[str]:
     if not MAPPING_FILE.exists():
         return []
@@ -183,9 +200,12 @@ def main() -> int:
 
     for path, lineno, text in additions:
         base = Path(path).name
-        # Layer 1
+        # Layer 1 -- searched against the placeholder-masked line, so a
+        # mapped token that is only a substring of an ALREADY-correct
+        # placeholder cannot fire (see _mask_placeholders' docstring).
+        masked = _mask_placeholders(text)
         for tok in tokens:
-            if tok.lower() in text.lower():
+            if tok.lower() in masked.lower():
                 findings.append(f"  {path}:{lineno}  known token: {tok!r}")
                 break
         # Layer 2

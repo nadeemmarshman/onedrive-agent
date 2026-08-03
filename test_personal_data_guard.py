@@ -17,7 +17,7 @@ pins that regression.
 import re
 import unittest
 
-from check_staged_for_personal_data import PLACEHOLDER, STRUCTURAL
+from check_staged_for_personal_data import PLACEHOLDER, STRUCTURAL, _mask_placeholders
 
 
 # A 13-digit value that is deliberately NOT a valid identity number.
@@ -106,6 +106,48 @@ class TestPlaceholderPattern(unittest.TestCase):
 
     def test_does_not_match_ordinary_angle_usage(self):
         self.assertIsNone(PLACEHOLDER.search("if a < b and c > d"))
+
+
+def _token_hits(text: str, tokens: list[str]) -> list[str]:
+    """Reproduce main()'s Layer 1 matching against masked text, without
+    depending on the real (gitignored) mapping file, so this test runs on
+    any clone."""
+    masked = _mask_placeholders(text)
+    return [t for t in tokens if t.lower() in masked.lower()]
+
+
+class TestLayer1PlaceholderMasking(unittest.TestCase):
+    """Regression: Layer 1 matched tokens against the RAW line, so a
+    mapped token that is only a substring of an already-correct
+    placeholder still fired. Same ambiguous-substring class as the
+    documented "Bytes" -> size_bytes incident, rediscovered independently
+    by Cowork's v1.1 finding: a real, correctly-mapped, ordinary-English-
+    word token (a sensitive folder name) matched inside its own correctly
+    -generated placeholder in an otherwise fully sanitised document.
+
+    Fixture below uses a synthetic token/placeholder pair rather than the
+    real one, deliberately, per this file's own header: writing about a
+    leak by quoting it is the exact pattern this whole guard exists to
+    prevent, and it has already recurred more than once in this repo.
+    """
+
+    FIXTURE_TOKEN = "Zephyr"
+    FIXTURE_PLACEHOLDER = "<zephyr-records>"
+
+    def test_token_inside_an_existing_placeholder_does_not_fire(self):
+        line = f"remainder -- ShareX\\Backup\\ configs, `{self.FIXTURE_PLACEHOLDER}\\`, Unsorted\\"
+        self.assertEqual(_token_hits(line, [self.FIXTURE_TOKEN]), [])
+
+    def test_same_token_still_fires_on_a_genuine_leak(self):
+        line = f"the file lives in the {self.FIXTURE_TOKEN} folder under 00-My Folders"
+        self.assertEqual(_token_hits(line, [self.FIXTURE_TOKEN]), [self.FIXTURE_TOKEN])
+
+    def test_masking_preserves_line_length_and_non_placeholder_content(self):
+        line = "before <a-placeholder> after"
+        masked = _mask_placeholders(line)
+        self.assertEqual(len(masked), len(line))
+        self.assertTrue(masked.startswith("before "))
+        self.assertTrue(masked.endswith(" after"))
 
 
 if __name__ == "__main__":

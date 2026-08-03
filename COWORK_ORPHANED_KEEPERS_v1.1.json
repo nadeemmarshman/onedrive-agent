@@ -1,0 +1,16 @@
+{
+ "finding": "orphaned keepers in quarantine - no surviving copy in the live tree",
+ "verified_on": "2026-08-03",
+ "quarantine_folder": "C:\\Users\\Nadeem\\OneDrive\\1. Documents\\_Duplicates_PendingDeletion\\Internal_Duplicates_20260803",
+ "quarantined_total_files": 345,
+ "quarantined_total_bytes": 619643806,
+ "orphan_files": 47,
+ "orphan_bytes": 14831492,
+ "distinct_documents_at_risk": 31,
+ "restore_actions": 31,
+ "restore_bytes": 13278112,
+ "bytes_safe_to_delete_after_restore": 606365694,
+ "gate": "re-run this check after restore; require orphan_files == 0 before permanent delete",
+ "entries_removed": 31,
+ "note": "per-document paths removed before publication; unredacted copy in _raw_local_only/ (gitignored)"
+}
