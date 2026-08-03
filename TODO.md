@@ -19,7 +19,13 @@ Remaining in flight:
       dated Feb 2026, and every divergence was live *adding* material, never
       contradicting the backup. Nothing to merge back — quarantined all 6 to
       `_Duplicates_PendingDeletion\Reload_Notes_Superseded\`.
-- [ ] **Reconcile the 2 same-named CV versions** consolidated into one folder.
+- [x] **2 same-named CV versions reconciled, 2026-08-03.** Third-party
+      document, so compared by structure only (timestamps, revision count,
+      word count) — never actual text. Both shared an identical creation
+      timestamp; the ex-ResumeResources copy was the later revision (later
+      modified date, +1 save, +1 word). Kept as canonical, promoted to the
+      plain filename; older ex-DocFolderBackup copy quarantined to
+      `_Duplicates_PendingDeletion\CV_Superseded\`.
 - [ ] **Decide on the remaining survey findings** — the 19.58 GB incomplete
       Google Takeout export (parts 001/005/009 missing) and the 41.18 GB
       Videos folder (no duplication found; an archival decision, not a dedup one).

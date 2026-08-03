@@ -102,7 +102,11 @@ suffixing the second `(from ResumeResources)` so neither was overwritten:
 └── CV of <third-party-3> 05112021 (from ResumeResources).docx  (ex-5. ResumeResources)
 ```
 
-{{owner}} should compare the two and decide if one is stale.
+**Reconciled 2026-08-03.** This is a third party's document (`<third-party-3>`), so the comparison deliberately reports structure only -- creation/modified timestamps, revision count, word count, diff-span lengths -- and no actual document text, consistent with the same discipline applied to {{owner}}'s own data (RAID I27).
+
+Both files share an **identical creation timestamp**, confirming a common origin. They differ by 99.97% text similarity (14 single-character insertion spans, consistent with minor formatting edits, not substantive rewrites). The ex-ResumeResources copy carries a **later modified date, one further save revision, and one more word** than the ex-DocFolderBackup copy -- it is the continuation of the same document, not a divergent version.
+
+**Kept the ex-ResumeResources copy as canonical**, promoted to the plain filename. Quarantined (not deleted) the older ex-DocFolderBackup copy to `_Duplicates_PendingDeletion\CV_Superseded\`.
 
 ## Remaining 14 discard files: permanently deleted (2026-08-02)
 
