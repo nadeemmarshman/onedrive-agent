@@ -43,13 +43,25 @@ Remaining in flight:
       `5 Certificates` documents both still have a stale duplicate sitting
       alongside the canonical copy — not auto-picked a second time. Worth a
       look whenever convenient, not blocking anything.
-- [ ] **`Unsorted\` (31 files) has never been triaged.** Cowork's report v2
-      states the de-duplication phase complete, and on the evidence scanned
-      it is — but 2 of the remaining 9 duplicate groups live inside
-      `Unsorted\`, which nobody has actually opened yet. "Complete" there is
-      a statement about what was scanned, not a guarantee about what's in a
-      folder no one has looked inside. Worth a look before treating the
-      count as final.
+- [x] **`Unsorted\` (31 files) triaged, 2026-08-04.** Every file identified
+      (content read where needed, not just filename) and checked by hash
+      against the rest of the live tree. Found 3 duplicate relationships,
+      not the 2 Cowork's v2 report stated (RAID I31) — all 3 quarantined to
+      `_Duplicates_PendingDeletion\Unsorted_Triage_20260803\`, keepers
+      confirmed intact. A further 13 non-duplicate files were reviewed and
+      quarantined at {{owner}}'s direction: reconciled financial records,
+      already-superseded utility statements, a hobby-association membership
+      record, two unrelated leisure-booking confirmations, and 2 files with
+      no ongoing value. 16 files quarantined in total, pending {{owner}}'s
+      final delete.
+- [ ] **15 files remain in `Unsorted\`, awaiting {{owner}}'s decision on where
+      each belongs.** Includes: correspondence relating to a closed,
+      unrelated prior personal matter (needs a considered home, not a quick
+      file); insurance/medical-scheme documents; one file that could not be
+      opened for review (protected, needs {{owner}} to open it himself); and
+      several older resume drafts likely superseded by the maintained
+      current-resume folder. Nothing quarantined here without a decision
+      first.
 
 ## 2. Then: send the GitHub Support purge request
 
