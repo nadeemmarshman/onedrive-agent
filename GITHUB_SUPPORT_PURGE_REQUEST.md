@@ -6,7 +6,9 @@ confirmation that the unreachable objects have been purged.
 **Outstanding on receipt:** record the ticket reference here and against
 RAID I27, then close the corresponding item in Backlog #18.
 
-**Ticket reference:** _(not yet recorded)_
+**Ticket reference:** 4624306 — confirmed by GitHub Enterprise Support 2026-08-03
+12:34 UTC (agent: Eremie); independently verified by {{owner}} 2026-08-04. See
+RAID I27.
 
 This file is retained as the governance record of exactly what was
 requested. Kept in the repository deliberately — it contains no personal
