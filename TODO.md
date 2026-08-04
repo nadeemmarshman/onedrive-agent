@@ -6,7 +6,7 @@ just "what happens next, and after what."
 
 ---
 
-## 1. Finish the duplication work  ← current
+## 1. Finish the duplication work — done, 2026-08-04
 
 Remaining in flight:
 
@@ -109,12 +109,17 @@ rather than needing a follow-up if further commits are made.
       before the originals were deleted: MD5-identical, `git bundle verify`
       reports a complete history, and a test clone recovered 94 commits
       including the purged ones.
-- [ ] After sending: record the ticket reference against RAID I27 and mark
-      Backlog #18's outstanding item closed when Support confirms.
+- [x] **Support confirmed 2026-08-03 (Ticket 4624306), independently
+      verified by {{owner}} 2026-08-04** with a positive-control test (a
+      reachable commit rendered while authenticated; 6/6 superseded commit
+      SHAs returned 404 in the same session — see RAID I27). Ticket
+      reference recorded, RAID I27 and Backlog #18's purge item both
+      closed.
 
-## 3. Then: decide on re-publication
+## 3. Then: decide on re-publication  ← current
 
-**Trigger: Support confirms the purge.**
+**Trigger met 2026-08-04 — Support has confirmed the purge.** This is now
+the live open item.
 
 - [ ] Review the sanitised artefacts as a reader would — particularly the
       two reports now truncated to their summary sections, and the reports
