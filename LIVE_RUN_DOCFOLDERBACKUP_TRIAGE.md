@@ -10,14 +10,14 @@ verified to total 58 both before execution (decision map checked against
 
 Placed only into folders that already existed in the live tree -- no new
 folders invented to force a placement. Categories: ID documents, resume
-photos, career/resume documents, employment records/<payslip-records>, the two
-<employerA> termination archives (contents not inspected -- still worth opening
-before relying on them), <household-records> warranty photos, <hobby-records>
+photos, career/resume documents, employment records/{{payslip-records}}, the two
+{{employerA}} termination archives (contents not inspected -- still worth opening
+before relying on them), {{household-records}} warranty photos, {{hobby-records}}
 reload documentation.
 
 ### Collision handling (6 files)
 
-Six files in `<hobby-records>\<hobby-activity>\308 <calibre-1>\` collided
+Six files in `{{hobby-records}}\{{hobby-activity}}\308 {{calibre-1}}\` collided
 with same-named files already in the live tree. Since
 `DOCFOLDERBACKUP_DELTA.json` had already confirmed these backup copies
 have **no byte-identical match anywhere**, a same-named file at the
@@ -26,12 +26,12 @@ actively-evolving reload-notes folder, not a duplicate. Never overwritten;
 each suffixed `(from DocFolderBackup)` instead, so both versions exist
 side by side:
 
-- `0. <calibre-1>_Case_Prep (from DocFolderBackup).docx`
-- `1.0 Summery_<calibre-1>_<ammunition-brand> 180gr_N540_Reload (from DocFolderBackup).docx`
-- `1.1 <ammunition-brand> 180gr_N540_Reload_Detail (from DocFolderBackup).docx`
-- `10. Reloading<calibre-1>ConsolidatedDocument (from DocFolderBackup).docx`
-- `3.0 Detailed_<calibre-1>_<ammunition-brand> 168gr_N140_Reload (from DocFolderBackup).docx`
-- `<calibre-1> Reload Data (from DocFolderBackup).xlsx`
+- `0. {{calibre-1}}_Case_Prep (from DocFolderBackup).docx`
+- `1.0 Summery_{{calibre-1}}_{{ammunition-brand}} 180gr_N540_Reload (from DocFolderBackup).docx`
+- `1.1 {{ammunition-brand}} 180gr_N540_Reload_Detail (from DocFolderBackup).docx`
+- `10. Reloading{{calibre-1}}ConsolidatedDocument (from DocFolderBackup).docx`
+- `3.0 Detailed_{{calibre-1}}_{{ammunition-brand}} 168gr_N140_Reload (from DocFolderBackup).docx`
+- `{{calibre-1}} Reload Data (from DocFolderBackup).xlsx`
 
 **Reconciled 2026-08-03.** All 6 pairs compared by actual content, not
 just filename/date -- `.docx` files via extracted document text
@@ -64,10 +64,10 @@ structure they came from). Reasons, each checked rather than assumed:
 - **7 `desktop.ini`** -- folder-view marker files, no content
 - **4 `.collection` files** -- opened and read: each is a small JSON
   pointer to a OneDrive item ID, not the actual image/content itself
-- **`CV of <third-party-3> 05112021.docx`** -- not {{owner}}'s own document
+- **`CV of {{third-party-3}} 05112021.docx`** -- not {{owner}}'s own document
 - **`Business-Analyst-Resume-Example-Free-Download.zip`** -- a downloaded
   template, not personal content
-- **`<vendor-diagnostic-tool>`** -- a software installer,
+- **`{{vendor-diagnostic-tool}}`** -- a software installer,
   not personal content
 - **`new 2.txt`** -- opened and read: a copy-pasted PowerShell/wsreset
   troubleshooting log, unrelated to personal documents
@@ -86,23 +86,23 @@ further identification:
 ## One Discard reclassified as Keep (2026-08-02)
 
 {{owner}} reviewed the discard list and asked to keep
-`CV of <third-party-3> 05112021.docx` after all. Moved (not from the
+`CV of {{third-party-3}} 05112021.docx` after all. Moved (not from the
 original discard batch, but pulled out before final delete) into a new
-folder: `2 Career Documents\1 CurrentResume\CV of <third-party-3> 05112021\`.
+folder: `2 Career Documents\1 CurrentResume\CV of {{third-party-3}} 05112021\`.
 
 A second, different-content file with the same name already existed at
-`1 CurrentResume\5. ResumeResources\CV of <third-party-3> 05112021.docx`
+`1 CurrentResume\5. ResumeResources\CV of {{third-party-3}} 05112021.docx`
 (confirmed via MD5 -- different hash, genuinely a different version).
 Consolidated both into the new folder rather than leaving one stranded,
 suffixing the second `(from ResumeResources)` so neither was overwritten:
 
 ```
-2 Career Documents\1 CurrentResume\CV of <third-party-3> 05112021\
-├── CV of <third-party-3> 05112021.docx                        (ex-DocFolderBackup)
-└── CV of <third-party-3> 05112021 (from ResumeResources).docx  (ex-5. ResumeResources)
+2 Career Documents\1 CurrentResume\CV of {{third-party-3}} 05112021\
+├── CV of {{third-party-3}} 05112021.docx                        (ex-DocFolderBackup)
+└── CV of {{third-party-3}} 05112021 (from ResumeResources).docx  (ex-5. ResumeResources)
 ```
 
-**Reconciled 2026-08-03.** This is a third party's document (`<third-party-3>`), so the comparison deliberately reports structure only -- creation/modified timestamps, revision count, word count, diff-span lengths -- and no actual document text, consistent with the same discipline applied to {{owner}}'s own data (RAID I27).
+**Reconciled 2026-08-03.** This is a third party's document (`{{third-party-3}}`), so the comparison deliberately reports structure only -- creation/modified timestamps, revision count, word count, diff-span lengths -- and no actual document text, consistent with the same discipline applied to {{owner}}'s own data (RAID I27).
 
 Both files share an **identical creation timestamp**, confirming a common origin. They differ by 99.97% text similarity (14 single-character insertion spans, consistent with minor formatting edits, not substantive rewrites). The ex-ResumeResources copy carries a **later modified date, one further save revision, and one more word** than the ex-DocFolderBackup copy -- it is the continuation of the same document, not a divergent version.
 

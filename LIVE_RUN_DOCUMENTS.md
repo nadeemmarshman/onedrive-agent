@@ -1,4 +1,4 @@
-# Live Run — `OneDrive\1. Documents` (phase index)
+# Live Run — `{{ONEDRIVE_ROOT}}\{{DOCS}}` (phase index)
 
 **Phase:** third live run of the Phase 1 dedup tool against real data,
 after `Pictures\Camera Roll` (`LIVE_RUN_CAMERA_ROLL.md`) and
@@ -24,13 +24,13 @@ The first two live runs were same-folder, filename-suffix duplicates
 (`" 1"`, `"(1)"`) — photos, low blast radius, one simple keeper rule.
 This phase was not:
 
-- **6.5 GB of financial, legal and identity documents** — <employerA>
-  termination/<dispute-body> records, <tax-authority>, <identity-documents>,
-  <payslip-records>, resumes. Materially higher consequence for a wrong delete.
+- **6.5 GB of financial, legal and identity documents** — {{employerA}}
+  termination/{{dispute-body}} records, {{tax-authority}}, {{identity-documents}},
+  {{payslip-records}}, resumes. Materially higher consequence for a wrong delete.
 - **Cross-directory duplication**, not suffix pairs — a stale
   `DocFolderBackup` folder mirrored most of the live tree, and in places
   a folder had been copy-pasted into itself
-  (`<employerA>_Termination\<employerA>_Termination\...`). `dedup_keeper.py`'s
+  (`{{employerA}}_Termination\{{employerA}}_Termination\...`). `dedup_keeper.py`'s
   suffix-based logic did not apply at all.
 - **Workstream ambiguity** — {{owner}}'s framing (2026-07-31): files
   duplicated across self-organised folder trees are not automatically
@@ -55,8 +55,8 @@ judgement for a materially different risk profile (6.5 GB of
 financial/legal/ID documents with confirmed self-duplication history,
 versus holiday photos recoverable from the platform's own bin).
 
-**Backup location:** `<DR_BACKUP_ROOT>`
-— robocopy mirror of `OneDrive\1. Documents`, taken **before any
+**Backup location:** `{{DR_BACKUP_ROOT}}`
+— robocopy mirror of `{{ONEDRIVE_ROOT}}\{{DOCS}}`, taken **before any
 destructive action**, and deliberately on a **different physical drive**
 so it survives anything done to the OneDrive tree.
 
@@ -163,9 +163,9 @@ An independent Cowork scan from **2026-07-08** covering part of this same
 folder was found untracked in the repo during staging
 (`COWORK_DUP_SCAN_FINDINGS_DOCUMENTS_v1.0.md`,
 `COWORK_DUP_SCAN_GROUPS_v1.0.json`). It scanned a narrower scope
-(`1. My Folders` + `<family-member-1>`; never `DocFolderBackup`), so it does not
+(`1. My Folders` + `{{family-member-1}}`; never `DocFolderBackup`), so it does not
 conflict with this phase's findings — but it **independently found the
-same `<employerA>_Termination` self-duplication**, which confirms that finding
+same `{{employerA}}_Termination` self-duplication**, which confirms that finding
 was real and had simply sat unactioned for three weeks. Committed rather
 than deleted, as evidence of the gap between detection and action.
 
@@ -198,10 +198,10 @@ than deleted, as evidence of the gap between detection and action.
 ## Open items
 
 - **Six `(from DocFolderBackup)`-suffixed files** in
-  `<hobby-records>\<hobby-activity>\308 <calibre-1>\` — older versions of
+  `{{hobby-records}}\{{hobby-activity}}\308 {{calibre-1}}\` — older versions of
   actively-evolving reload notes, deliberately not overwritten. {{owner}} to
   compare each pair and drop whichever is stale.
-- **Two `CV of <third-party-3> 05112021` versions** consolidated into one
+- **Two `CV of {{third-party-3}} 05112021` versions** consolidated into one
   folder, different content — same call to make.
-- **`<DR_BACKUP_ROOT>`** (6.5 GB) still on disk.
+- **`{{DR_BACKUP_ROOT}}`** (6.5 GB) still on disk.
   Worth keeping until the above are settled; then it can go.

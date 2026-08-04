@@ -14,7 +14,7 @@ were enough.
 Design notes (both learned the hard way, first attempt)
 -------------------------------------------------------
 1. **Token regexes, not exact phrases.** A first version enumerated exact
-   full strings such as "<employer>_Termination". Real data does not
+   full strings such as "{{employer}}_Termination". Real data does not
    cooperate: the same entity appeared in at least four shapes -- joined
    to other words, abbreviated, camel-cased, and prefixed with a payroll
    number -- so enumeration silently missed most instances. Matching on
@@ -183,7 +183,7 @@ def strip_lists(obj):
                     "note": "per-file entries removed before publication"}
         return [strip_lists(v) for v in obj]
     if isinstance(obj, str) and PATH_SHAPED.search(obj):
-        return "<redacted-path>"
+        return "{{redacted-path}}"
     return obj
 
 

@@ -49,7 +49,7 @@ for a different reason (see below).
 
 ### The 31st document — not a defect at all
 
-`CV_Superseded\CV of <third-party-3> 05112021.docx` genuinely has no
+`CV_Superseded\CV of {{third-party-3}} 05112021.docx` genuinely has no
 live copy, and correctly so: it was quarantined **on purpose**, after a
 real content comparison, by an earlier and already-completed
 reconciliation (commit `0de68ec`). That decision concluded this was the

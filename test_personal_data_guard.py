@@ -80,7 +80,7 @@ class TestStructuralLayer(unittest.TestCase):
     def test_structural_ignores_placeholder_paths(self):
         # Sanitised output must not trip the guard, or the guard becomes
         # noise and gets overridden habitually.
-        line = r"Kept `<identity-documents>\<file>.jpg` and `<hobby-records>\<sub>\<f>.pdf`"
+        line = r"Kept `{{identity-documents}}\{{file}}.jpg` and `{{hobby-records}}\{{sub}}\{{f}}.pdf`"
         self.assertIsNone(structural_hit(line))
 
     def test_structural_ignores_ordinary_prose(self):
@@ -100,12 +100,19 @@ class TestStructuralLayer(unittest.TestCase):
 
 class TestPlaceholderPattern(unittest.TestCase):
     def test_matches_generated_placeholders(self):
-        for p in ["<identity-documents>", "<employerA>", "<hobby-records>", "<DOCS_ROOT>"]:
+        for p in ["{{identity-documents}}", "{{employerA}}", "{{hobby-records}}", "{{DOCS_ROOT}}"]:
             with self.subTest(p=p):
                 self.assertIsNotNone(PLACEHOLDER.search(p))
 
-    def test_does_not_match_ordinary_angle_usage(self):
-        self.assertIsNone(PLACEHOLDER.search("if a < b and c > d"))
+    def test_does_not_match_ordinary_brace_usage(self):
+        self.assertIsNone(PLACEHOLDER.search("a dict literal like {a: 1, b: 2}"))
+
+    def test_does_not_match_markdown_link_text(self):
+        # The reason {{...}} was chosen over [...]: a single-word markdown
+        # link like [here](url) would match a square-bracket placeholder
+        # regex and get masked as "already redacted" by _mask_placeholders,
+        # which could hide a genuine leaked token inside real link text.
+        self.assertIsNone(PLACEHOLDER.search("see [here](https://example.com) for detail"))
 
 
 def _token_hits(text: str, tokens: list[str]) -> list[str]:
@@ -132,7 +139,7 @@ class TestLayer1PlaceholderMasking(unittest.TestCase):
     """
 
     FIXTURE_TOKEN = "Zephyr"
-    FIXTURE_PLACEHOLDER = "<zephyr-records>"
+    FIXTURE_PLACEHOLDER = "{{zephyr-records}}"
 
     def test_token_inside_an_existing_placeholder_does_not_fire(self):
         line = f"remainder -- ShareX\\Backup\\ configs, `{self.FIXTURE_PLACEHOLDER}\\`, Unsorted\\"
@@ -143,7 +150,7 @@ class TestLayer1PlaceholderMasking(unittest.TestCase):
         self.assertEqual(_token_hits(line, [self.FIXTURE_TOKEN]), [self.FIXTURE_TOKEN])
 
     def test_masking_preserves_line_length_and_non_placeholder_content(self):
-        line = "before <a-placeholder> after"
+        line = "before {{a-placeholder}} after"
         masked = _mask_placeholders(line)
         self.assertEqual(len(masked), len(line))
         self.assertTrue(masked.startswith("before "))

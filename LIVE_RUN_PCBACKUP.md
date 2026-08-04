@@ -52,7 +52,7 @@ disk against 2.77 GB logical. Hashing it therefore required hydrating
 An initial name+size comparison suggested ~96% overlap and would have
 cost nothing. It was rejected as insufficient evidence to delete on, for
 a reason this dataset had already demonstrated: during the
-`DocFolderBackup` triage, **six files in the `308 <calibre-1>` folder
+`DocFolderBackup` triage, **six files in the `308 {{calibre-1}}` folder
 shared identical names with live-tree files but held genuinely different
 content**. Name+size matching would have destroyed those. On a folder of
 legal and financial records, bandwidth was the cheaper risk.
@@ -90,12 +90,12 @@ phase and ruled on by {{owner}} that same day**:
 | Prior decision | File |
 |---|---|
 | DISCARD → deleted | `Business-Analyst-Resume-Example-Free-Download.zip` |
-| DISCARD → deleted | `<vendor-diagnostic-tool>` |
-| DISCARD → deleted | `<employerD> 1997 Top Achiever.collection` |
-| DISCARD → deleted | `<employerD> move to <employerC>.collection` |
-| DISCARD → deleted | `<education-body> Certificate of Evaluation Grd 12.collection` |
-| DISCARD → deleted | `<employerC> Employment.collection` |
-| LEAVE → deleted by {{owner}} | `<care-facility>\20 Mar, 11.46​.m4a` |
+| DISCARD → deleted | `{{vendor-diagnostic-tool}}` |
+| DISCARD → deleted | `{{employerD}} 1997 Top Achiever.collection` |
+| DISCARD → deleted | `{{employerD}} move to {{employerC}}.collection` |
+| DISCARD → deleted | `{{education-body}} Certificate of Evaluation Grd 12.collection` |
+| DISCARD → deleted | `{{employerC}} Employment.collection` |
+| LEAVE → deleted by {{owner}} | `{{care-facility}}\20 Mar, 11.46​.m4a` |
 
 They register as "unique" only because their live-tree counterparts were
 removed earlier the same day.
@@ -115,7 +115,7 @@ was deleted by {{owner}} earlier that day without identification. It was
 verified byte-identical in two surviving locations and flagged to him
 before the move rather than silently carried along:
 
-- `<DR_BACKUP_ROOT>\DocFolderBackup\Documents\<care-facility>\`
+- `{{DR_BACKUP_ROOT}}\DocFolderBackup\Documents\{{care-facility}}\`
 - the PC Backup copy now in quarantine
 
 {{owner}} elected to quarantine everything, standing by the original
@@ -146,8 +146,8 @@ Nothing deleted. Final delete is {{owner}}'s call, as in every phase.
 ## Safety-net caveat, stated explicitly
 
 Unlike the Documents phase, **the D: backup does not cover this folder.**
-`<DR_BACKUP_ROOT>` mirrors
-`OneDrive\1. Documents` only — verified from the robocopy log's own
+`{{DR_BACKUP_ROOT}}` mirrors
+`{{ONEDRIVE_ROOT}}\{{DOCS}}` only — verified from the robocopy log's own
 `Source :` line — and `PC Backup` is a root-level sibling, not a child.
 
 This was raised with {{owner}} before any move. The residual exposure is

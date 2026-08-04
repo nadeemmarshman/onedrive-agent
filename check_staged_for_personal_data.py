@@ -119,11 +119,25 @@ STRUCTURAL = [
 # Lines that are legitimately allowed to contain path-shaped text: the
 # placeholders the sanitiser produces, and this file's own patterns.
 # Underscores matter: the sanitiser emits both kebab-case placeholders
-# (<identity-documents>) and SCREAMING_SNAKE roots (<DOCS_ROOT>,
-# <ONEDRIVE_ROOT>, <DR_BACKUP_ROOT>). Omitting `_` made the latter look
+# ({{identity-documents}}) and SCREAMING_SNAKE roots ({{DOCS_ROOT}},
+# {{ONEDRIVE_ROOT}}, {{DR_BACKUP_ROOT}}). Omitting `_` made the latter look
 # like real content and would have produced false positives on correctly
 # sanitised files -- found by test_matches_generated_placeholders.
-PLACEHOLDER = re.compile(r"<[a-z0-9_-]+>", re.IGNORECASE)
+#
+# CHANGED 2026-08-04: delimiter switched from <...> to {{...}}, repo-wide.
+# Two independent problems with the original <...> form, both found via an
+# independent stranger-read review: (1) it is silently stripped by both
+# GitHub's markdown renderer and any HTML-based converter, which treat
+# <employerA> as an unrecognised custom HTML element and drop it --
+# reported as "incomplete" table rows, which turned out to be redaction
+# placeholders vanishing, not real data loss. Square brackets [...] were
+# considered as the fix and rejected: they collide with Markdown's own
+# link syntax, e.g. a single-word link text like [here](url) would match
+# this same regex and get masked as an "existing placeholder" by
+# _mask_placeholders() below -- which could hide a genuine leaked token
+# sitting inside real link text. {{...}} has no meaning in Markdown or
+# HTML and does not collide with anything already used in this repo.
+PLACEHOLDER = re.compile(r"\{\{[a-z0-9_-]+\}\}", re.IGNORECASE)
 # Files exempt from the structural layer because their job is to *contain*
 # path-shaped strings: the guard itself, the sanitiser, and the guard's
 # tests (whose fixtures are deliberately synthetic -- "SomeUser",
@@ -161,7 +175,7 @@ def staged_additions() -> list[tuple[str, int, str]]:
 
 
 def _mask_placeholders(text: str) -> str:
-    """Blank out every <...> placeholder span before token-matching.
+    """Blank out every [...] placeholder span before token-matching.
 
     Without this, a mapped token that is only a SUBSTRING of an existing,
     already-correct placeholder still matches -- the same ambiguous-

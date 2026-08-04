@@ -64,7 +64,7 @@ the paths and filenames — but those alone disclose sensitive personal
 information, including:
 
 - employment dispute records (a termination, suspension, disciplinary
-  hearing and CCMA referral)
+  hearing and {{dispute-body}} referral)
 - firearm licence records, including specific firearm models and a
   competency certificate
 - identity, marriage and estate documents
@@ -184,7 +184,7 @@ Thank you,
 
   If Support asks for the remaining abbreviated SHAs in full, clone a bundle
   and read them:
-  `git clone <bundle> tmp && git -C tmp log --format=%H`
+  `git clone {{bundle}} tmp && git -C tmp log --format=%H`
 - **Do not attach the sensitive files** to the ticket. The paths themselves
   are the sensitive content — describing the categories, as above, is enough.
 - **Keep the repository private** until Support confirms, and until you have

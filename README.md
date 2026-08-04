@@ -300,7 +300,7 @@ rather than splitting into multiple repos:
   in-phase checkpoint (first commit only), kept as-is rather than moved.
   See `Handoff-Briefs/Live-Run-Handoff_v1.0.md` for full detail.
 - Further live-run phases against other folders will each get their own
-  `vN.0-live-run-<name>` tag following the same pattern.
+  `vN.0-live-run-{{name}}` tag following the same pattern.
 
 ---
 

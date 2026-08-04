@@ -13,7 +13,7 @@ per-document restore list in `_raw_local_only/`, gitignored).
 > in the live tree.** Deleting `_Duplicates_PendingDeletion\` as it currently stands
 > destroys the only remaining copy of each — 12.66 MB of certificates, diplomas and
 > career records. Restore first (§4), re-run the orphan check, then delete.
-> Nothing is lost yet: all 47 are intact in quarantine, and the `<DR_BACKUP_ROOT>`
+> Nothing is lost yet: all 47 are intact in quarantine, and the `{{DR_BACKUP_ROOT}}`
 > backup is a second net.
 
 ---
@@ -25,8 +25,8 @@ Re-checked on disk, not taken from the run's own output:
 | Claim | Independent result | Verdict |
 |---|---|---|
 | 344 files / 590.9 MB quarantined | **345 files** / 590.9 MB | Size exact; count off by one |
-| Self-nested `<employerA>_Termination\<employerA>_Termination\` reduced to 1 file / ~100 KB | **1 file, 64,746 bytes** | ✅ |
-| `<hearing-recording>.wav` — keeper at shallow path, 2 nested copies quarantined | Exactly one 245,618,212-byte copy remains, at the shallow path | ✅ |
+| Self-nested `{{employerA}}_Termination\{{employerA}}_Termination\` reduced to 1 file / ~100 KB | **1 file, 64,746 bytes** | ✅ |
+| `{{hearing-recording}}.wav` — keeper at shallow path, 2 nested copies quarantined | Exactly one 245,618,212-byte copy remains, at the shallow path | ✅ |
 | Nothing deleted; move only | All 345 present in quarantine | ✅ |
 | Cowork's 242 groups resolved | **242 / 242**, 581.7 MB reclaimed | ✅ |
 
@@ -65,7 +65,7 @@ they are now the only copies in existence outside the DR backup.
 | **21** | `2 Career Documents\5 Certificates\` — the folder is effectively emptied |
 | 3 | `2 Career Documents\4 Employment Companies\` |
 | 2 | `2 Career Documents\1 CurrentResume\` |
-| 21 | remainder — `ShareX\Backup\` configs, `<household-records>\`, `Unsorted\`, `CV_Superseded\`, one root PNG |
+| 21 | remainder — `ShareX\Backup\` configs, `{{household-records}}\`, `Unsorted\`, `CV_Superseded\`, one root PNG |
 
 The `5 Certificates` casualties include the 1987 high-school diploma, the Grade 12
 diploma and its evaluation certificates, overseas transcripts, First Aid Level 1, and
@@ -138,7 +138,7 @@ intended invariants, run every phase, not just when someone thinks to ask.
 
 - Orphan test is **content-based** (full MD5), not name-based: a document counts as
   surviving only if a byte-identical copy exists in `00-My Folders\` or
-  `<family-member-1>\`. Files moved elsewhere and renamed would still be detected.
+  `{{family-member-1}}\`. Files moved elsewhere and renamed would still be detected.
 - Live-tree scope is the two mounted roots. A surviving copy in another `1. Documents`
   subfolder outside that scope would not be seen — if any of the 31 look wrong, check
   there before restoring.

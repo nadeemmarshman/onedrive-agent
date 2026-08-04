@@ -8,7 +8,7 @@ decisions on the 58 unique files later.
 
 `relocate_docfolderbackup_unique_files.py` moved all 58 files
 (DOCFOLDERBACKUP_DELTA.json's `unique_file_list`, 496.6 MB) out of
-`DocFolderBackup` into `OneDrive\1. Documents\_DocFolderBackup_Unique_Files_ToReview\`,
+`DocFolderBackup` into `{{ONEDRIVE_ROOT}}\{{DOCS}}\_DocFolderBackup_Unique_Files_ToReview\`,
 preserving each file's original relative path exactly (no guessed
 remapping to the live tree's current, reorganized folder structure --
 `1. My Folders` became `00-My Folders` at some point, and other folders
@@ -39,7 +39,7 @@ Verified after the move:
 
 A verified full physical backup of the pre-quarantine state already
 exists independently of this action:
-`<DR_BACKUP_ROOT>` (3,084/3,084 files, MD5-verified
+`{{DR_BACKUP_ROOT}}` (3,084/3,084 files, MD5-verified
 identical, RAID I24). Nothing here is a permanent delete -- both moves
 are reversible.
 
@@ -52,7 +52,7 @@ Verified after the fact: the folder no longer exists on disk, the
 `_DocFolderBackup_Unique_Files_ToReview\` (58 files) untouched, and
 `1. Documents` total size dropped from 6.5 GB to 4.0 GB -- matching the
 2.6 GB expected exactly. The independent full backup
-(`<DR_BACKUP_ROOT>`) still exists regardless, as a
+(`{{DR_BACKUP_ROOT}}`) still exists regardless, as a
 separate safety net outside this folder entirely.
 
 ## What this doesn't cover yet
@@ -62,4 +62,4 @@ separate safety net outside this folder entirely.
   delete above
 - The ~7 genuine internal-duplicate groups found in the earlier live-tree
   scan (certificate photo, handoff-brief doc, README.png, profile pics,
-  <employerA> certificate PDF) are unrelated to DocFolderBackup and still open
+  {{employerA}} certificate PDF) are unrelated to DocFolderBackup and still open

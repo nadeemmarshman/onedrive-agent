@@ -31,21 +31,21 @@ groups; this is a fresh full-tree scan).
 
 | Reclaimable | Copies | File |
 |---|---|---|
-| 468.5 MB | 3 | `<hearing-recording>.wav` |
-| 13.2 MB | 3 | `Statement_N_<surname-redacted>.pdf` |
-| 9.8 MB | 4 | `D_<suspension-notice> 1stNov2019.pdf` |
-| 8.8 MB | 4 | `F_<union>Agreeement9thDec2019.pdf` |
-| 6.5 MB | 4 | `C_<warning-appeal> 4thOct2019.pdf` |
+| 468.5 MB | 3 | `{{hearing-recording}}.wav` |
+| 13.2 MB | 3 | `Statement_N_{{surname-redacted}}.pdf` |
+| 9.8 MB | 4 | `D_{{suspension-notice}} 1stNov2019.pdf` |
+| 8.8 MB | 4 | `F_{{union}}Agreeement9thDec2019.pdf` |
+| 6.5 MB | 4 | `C_{{warning-appeal}} 4thOct2019.pdf` |
 | 5.4 MB | 2 | `LSS GB Experience.pptx` |
 | 4.6 MB | 3 | `agile-edx_A_context.pdf` |
 | 4.4 MB | 2 | `knockout-target.pdf` |
-| 2.3 MB | 2 | `<competency-form>_CompetanceCert_AllTypes.pdf` |
+| 2.3 MB | 2 | `{{competency-form}}_CompetanceCert_AllTypes.pdf` |
 | 2.2 MB | 2 | `IMG_20241030_094042.jpg` |
-| 2.1 MB | 2 | `<school>ProficiencyExamReport.jpg` |
+| 2.1 MB | 2 | `{{school}}ProficiencyExamReport.jpg` |
 | 2.0 MB | 2 | `Game extended Samsung washing machine warrantee.pdf` |
 | 1.8 MB | 2 | `A(b)_LoanAgreement.pdf` |
-| 1.6 MB | 4 | `B_<employerA>RequestforWarningAppeal 3rdOct2019.pdf` |
-| 1.6 MB | 4 | `E_<disciplinary-enquiry-notice> 2ndDec2019.pdf` |
+| 1.6 MB | 4 | `B_{{employerA}}RequestforWarningAppeal 3rdOct2019.pdf` |
+| 1.6 MB | 4 | `E_{{disciplinary-enquiry-notice}} 2ndDec2019.pdf` |
 
 The headline item is unchanged from Cowork's finding: the three live-tree
 copies of the employment-dispute recording, at 234.2 MB each, account for

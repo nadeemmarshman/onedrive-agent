@@ -163,7 +163,7 @@ Primary recovery is OneDrive's built-in recycle bin and version history (30–18
 
 Run before *any* commit that touches documents or committed content — this is the guard for the process-only recurrence class (I1, I3, non-persisted work, version drift):
 
-- [ ] **Content verified, not assumed:** confirm the file on disk holds the intended content (not a placeholder), e.g. `git show HEAD:<file>` after commit, or a screenshot of the actual content.
+- [ ] **Content verified, not assumed:** confirm the file on disk holds the intended content (not a placeholder), e.g. `git show HEAD:{{file}}` after commit, or a screenshot of the actual content.
 - [ ] **Commit stats sanity-checked:** insertions/deletions match the intended change shape (a pure addition should not show large deletions — how I1 was caught).
 - [ ] **Right version loaded:** if Project-knowledge files are involved, confirm via screenshot which version is actually loaded before relying on it.
 - [ ] **Fact-checked against the live repo:** claims about the build verified against the committed source, not a prior summary.

@@ -24,7 +24,7 @@ this project made on zero-byte groups earlier in the live-run programme.
 
 ## Headline result: the self-nested subtree
 
-The `<employerA>_Termination\<employerA>_Termination\` self-nested subtree — flagged
+The `{{employerA}}_Termination\{{employerA}}_Termination\` self-nested subtree — flagged
 repeatedly across this whole phase (`DOCUMENTS_WORKSTREAM_DEDUP_REPORT.md`,
 `COWORK_RECONCILIATION_FINDING_v1.0.md`, RAID I28) — went from **42 files
 / ~500 MB down to 1 file / 100 KB**. Nearly everything in it was a
@@ -73,7 +73,7 @@ own printed summary:
 
 ## Safety net
 
-`<DR_BACKUP_ROOT>` still holds every file's
+`{{DR_BACKUP_ROOT}}` still holds every file's
 pre-cleanup state. Nothing here is a permanent delete — this is a move,
 reversible via Recycle Bin or that backup.
 

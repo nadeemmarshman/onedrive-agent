@@ -1,6 +1,6 @@
 # OneDrive AI Agent — Live Run Handoff Brief (Documents folder phase)
 
-**Purpose of this document:** Context handoff for the live-run phase against `OneDrive\1. Documents`, written so any Claude session (or Cowork) picking this up has the background without re-deriving it. Same purpose and convention as `Live-Run-Handoff_v1.0.md` (Camera Roll/Pictures root phase), kept as a separate document because this phase has a materially different risk profile and duplication pattern.
+**Purpose of this document:** Context handoff for the live-run phase against `{{ONEDRIVE_ROOT}}\{{DOCS}}`, written so any Claude session (or Cowork) picking this up has the background without re-deriving it. Same purpose and convention as `Live-Run-Handoff_v1.0.md` (Camera Roll/Pictures root phase), kept as a separate document because this phase has a materially different risk profile and duplication pattern.
 
 **Current version: v1.0**
 
@@ -23,13 +23,13 @@ filename-suffix duplicates (`" 1"`, `"(1)"`) — low blast radius (photos),
 simple keeper rule. This phase is materially different:
 
 - **6.5 GB, 3,084 files** of financial, legal, and identity documents
-  (<employerA> termination/<dispute-body> records, <tax-authority>, <identity-documents>,
-  <payslip-records>, resumes) — much higher consequence if something is deleted
+  ({{employerA}} termination/{{dispute-body}} records, {{tax-authority}}, {{identity-documents}},
+  {{payslip-records}}, resumes) — much higher consequence if something is deleted
   wrongly than a duplicate holiday photo.
 - **Cross-directory duplication**, not same-folder suffix pairs —
   `DocFolderBackup` mirrors most of the live tree from a different
   top-level folder entirely, and some duplication is a folder
-  copy-pasted into itself (`<employerA>_Termination\<employerA>_Termination\...`).
+  copy-pasted into itself (`{{employerA}}_Termination\{{employerA}}_Termination\...`).
   `dedup_keeper.py`'s suffix-based logic doesn't apply here at all.
 - {{owner}}'s framing (2026-07-31): duplicate files across different
   **workstreams** (self-organized folder trees built up over time) are
@@ -52,7 +52,7 @@ beds.
 
 **This phase escalates beyond that decision**, at {{owner}}'s explicit
 request (2026-07-31): a full physical backup of the entire
-`OneDrive\1. Documents` folder to `D:\` before any quarantine/delete
+`{{ONEDRIVE_ROOT}}\{{DOCS}}` folder to `D:\` before any quarantine/delete
 action runs, in addition to (not instead of) the existing quarantine
 pattern.
 
@@ -62,7 +62,7 @@ decision:** the original Option A vs B trade-off explicitly weighed
 built around small test beds and, at largest, a personal photo folder.
 This phase's actual folder is 6.5 GB of financial/legal/ID documents
 with a confirmed history of accidental self-duplication
-(`<employerA>_Termination\<employerA>_Termination`) already found once by this same live
+(`{{employerA}}_Termination\{{employerA}}_Termination`) already found once by this same live
 run (see `LIVE_RUN_PICTURES_ROOT.md`-equivalent findings for this
 folder). The cost of Option B (storage, time) is trivial here (256 GB
 free on `D:`, ~15 seconds to copy) relative to the cost of getting a
@@ -71,8 +71,8 @@ legal record. Proportionate risk-based judgement, applied fresh to a
 different risk profile, not a departure from the original decision's
 own reasoning.
 
-**Backup taken:** `robocopy` mirror of `<ONEDRIVE_ROOT>\1.
-Documents` to `<DR_BACKUP_ROOT>`, `/E /COPY:DAT`
+**Backup taken:** `robocopy` mirror of `{{ONEDRIVE_ROOT}}\1.
+Documents` to `{{DR_BACKUP_ROOT}}`, `/E /COPY:DAT`
 (subdirectories including empty ones; data+attributes+timestamps, no
 security/owner metadata — irrelevant for a single-user DR copy).
 
@@ -128,10 +128,10 @@ began, not created by it):
 - `COWORK_DUP_SCAN_FINDINGS_DOCUMENTS_v1.0.md` +
   `COWORK_DUP_SCAN_GROUPS_v1.0.json` — an independent Cowork scan from
   **2026-07-08**, scoped to `1. My Folders` (the live folder's name
-  before it was renamed to `00-My Folders`) and `<family-member-1>` only (1,689
+  before it was renamed to `00-My Folders`) and `{{family-member-1}}` only (1,689
   files, not the full tree this phase scanned). Found 242 duplicate
   groups, 581.7 MB reclaimable, and **independently identified the same
-  `<employerA>_Termination\<employerA>_Termination` self-nested-copy pattern** this
+  `{{employerA}}_Termination\{{employerA}}_Termination` self-nested-copy pattern** this
   phase found fresh on 2026-07-31 — confirming it's real, and that it
   was never actioned in the three weeks between the two scans (no files
   were deleted by the July 8 scan itself; read-only findings only).
@@ -149,14 +149,14 @@ or vintage, so group counts aren't directly comparable without mapping
 `1. My Folders` paths to their `00-My Folders` equivalents first. Flagged
 here rather than silently ignored; worth doing before finalizing which
 files get deleted from `DocFolderBackup` /
-`<employerA>_Termination\<employerA>_Termination`, since the July 8 report's Appendix A
+`{{employerA}}_Termination\{{employerA}}_Termination`, since the July 8 report's Appendix A
 (in the `.docx`, not the companion JSON) may contain keeper/delete
 judgment calls already made by {{owner}} that shouldn't be silently
 re-decided.
 
 ## What happened in this phase so far (chronological)
 
-1. High-level recon of `OneDrive\1. Documents`: 6.5 GB, 3,084 files, 551
+1. High-level recon of `{{ONEDRIVE_ROOT}}\{{DOCS}}`: 6.5 GB, 3,084 files, 551
    subfolders, 0 OneDrive cloud-only placeholders (fully hydrated, no
    network-hydration risk during hashing).
 2. Full duplicate scan (`scan_documents_dedup.py`, read-only, no files
@@ -204,7 +204,7 @@ simpler explanation than an unexplained sandbox artifact.
 
 **This session stands down from further repo-writing work as of this
 commit**, per {{owner}}'s direction — further dedup/quarantine execution on
-`OneDrive\1. Documents` is owned by the "Folder Dedup fork" session, not
+`{{ONEDRIVE_ROOT}}\{{DOCS}}` is owned by the "Folder Dedup fork" session, not
 this one.
 
 ---
@@ -216,6 +216,6 @@ this one.
 - ✅ Full DR backup taken and verified (see verification section)
 - ⬜ Awaiting {{owner}}'s decision on the suggested approach (rescue-then-quarantine
   for DocFolderBackup) before any execution
-- ⬜ `<employerA>_Termination\<employerA>_Termination` self-nested duplicate, `Certificates`
-  vs `5 Certificates`, and `<employerA>_HR_Documents` vs `<salary-records>\<employerA> HR` all
+- ⬜ `{{employerA}}_Termination\{{employerA}}_Termination` self-nested duplicate, `Certificates`
+  vs `5 Certificates`, and `{{employerA}}_HR_Documents` vs `{{salary-records}}\{{employerA}} HR` all
   still need {{owner}}'s workstream-validity judgment, not yet decided

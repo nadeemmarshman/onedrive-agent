@@ -3,7 +3,7 @@
 **From:** Claude Cowork session, 8 July – 3 August 2026
 **To:** the next session (Cowork or CODE) picking up the Documents work
 **Closes:** the de-duplication phase from the Cowork side
-**Companion:** `<ONEDRIVE_ROOT>\<DOCS>\<area>\<admin>\<audit-report-v2>.docx` (closing report, plain-English, for {{owner}})
+**Companion:** `{{ONEDRIVE_ROOT}}\{{DOCS}}\{{area}}\{{admin}}\{{audit-report-v2}}.docx` (closing report, plain-English, for {{owner}})
 
 ---
 
@@ -26,11 +26,11 @@ carried forward from any report:
 | Reclaimable | 581.7 MB | **0.44 MB** |
 
 Current tree: 1,288 files / 3,274.4 MB across `00-My Folders` (1,201 files,
-247 folders), `<family-member-1>`, `Unsorted` (31), `ShareX` (19).
+247 folders), `{{family-member-1}}`, `Unsorted` (31), `ShareX` (19).
 `Certificates\` (top-level) and `_Duplicates_PendingDeletion\` are both empty.
 
 Of the 9 remaining groups, 4 are `ShareX` application backups behaving normally
-and should be left alone. The rest resolve when `Unsorted\` and `<care-facility>\`
+and should be left alone. The rest resolve when `Unsorted\` and `{{care-facility}}\`
 are triaged.
 
 ## 3. What was done
@@ -49,8 +49,8 @@ is why two near-misses cost nothing.
 
 **Small, mechanical:**
 
-- 2 `.lnk` shortcuts — under `<training>\...\LSS GB Simulation Files\` and
-  `<employerA>_Work_Files\Mine\General\<firearm-3>\`
+- 2 `.lnk` shortcuts — under `{{training}}\...\LSS GB Simulation Files\` and
+  `{{employerA}}_Work_Files\Mine\General\{{firearm-3}}\`
 - `Other Unsorted` (1 file) and `Random Artifacts` (empty) — review then delete
 - `Personal(Revolving)` — bracketed folder name, still to fix
 - 6 reload-notes pairs with `(from DocFolderBackup)` suffixes — need a human
@@ -106,7 +106,7 @@ counter without stopping it.
 `COWORK_RECONCILIATION_FINDING_v1.1.md`, `COWORK_ORPHANED_KEEPERS_v1.1.json`,
 `Handoff-Briefs\CODE-to-Cowork-Reconciliation-Response_v1.0.md`, this brief.
 
-**In OneDrive (`<area>\<admin>\`):** report v1 + its duplicate-groups JSON
+**In OneDrive (`{{area}}\{{admin}}\`):** report v1 + its duplicate-groups JSON
 (retained as the record of the starting state), and report v2.
 
 ## 7. Suggested first move for the successor

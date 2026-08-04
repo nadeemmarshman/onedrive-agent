@@ -24,19 +24,19 @@ per-group detail in `_raw_local_only/`, gitignored).
 | Suggested keepers missing (data-loss check) | **0** — no keeper was lost |
 
 The phase index already recorded the risk in its own words: the Cowork scan
-"independently found the same `<employerA>_Termination` self-duplication, which confirms
+"independently found the same `{{employerA}}_Termination` self-duplication, which confirms
 that finding was real and had simply sat unactioned for three weeks." That statement
 is still true today — the three weeks is now four.
 
 Spot-check, live paths, 2026-08-03:
 
 ```
-245618212  ...\<employerA>_Termination\<employerA-suspension>\<hearing-recording>.wav
-245618212  ...\<employerA>_Termination\<employerA>_Termination\<employerA-suspension>\<hearing-recording>.wav
-245618212  ...\<employerA>_Termination\<employerA>_Termination\<employerA-suspension>\<suspension-documents>\<hearing-recording>.wav
+245618212  ...\{{employerA}}_Termination\{{employerA-suspension}}\{{hearing-recording}}.wav
+245618212  ...\{{employerA}}_Termination\{{employerA}}_Termination\{{employerA-suspension}}\{{hearing-recording}}.wav
+245618212  ...\{{employerA}}_Termination\{{employerA}}_Termination\{{employerA-suspension}}\{{suspension-documents}}\{{hearing-recording}}.wav
 ```
 
-`<employerA>_Termination\` tree: **777 MB across 87 files**, self-nested subtree intact.
+`{{employerA}}_Termination\` tree: **777 MB across 87 files**, self-nested subtree intact.
 
 The 4 groups that did resolve were the profile-picture variants (Groups 5–6 of
 `LIVE_RUN_INTERNAL_DUPLICATES.md`) — see §3 for why exactly those.
@@ -65,7 +65,7 @@ remediation for that class was the wholesale quarantine-and-delete of the
 Live-tree redundancy inside those groups was therefore never queued for action, and
 never appeared in any summary.
 
-The `<hearing-recording>.wav` group, as recorded in the raw proposal, had **4 members:
+The `{{hearing-recording}}.wav` group, as recorded in the raw proposal, had **4 members:
 1 backup + 3 live**. It was classified `docfolderbackup_vs_live`. One copy was deleted.
 Three remain.
 
@@ -136,7 +136,7 @@ or a post-action re-scan, closes that loop. This finding is the former.
 
 3. **Work the 238 groups** in `COWORK_RECONCILIATION_REMAINING_v1.0.json`
    (`_raw_local_only/` for paths). Highest-value single action remains deleting the
-   self-nested `<employerA>_Termination\<employerA>_Termination\` subtree — ~500 MB,
+   self-nested `{{employerA}}_Termination\{{employerA}}_Termination\` subtree — ~500 MB,
    one operation.
 
 4. **Add a post-action verification step** to the live-run pattern: re-scan after

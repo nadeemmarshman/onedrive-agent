@@ -33,8 +33,8 @@ bottom.
    something is confusing, that confusion is the data point — report it as
    "confusing," don't ask to have it explained away. A real stranger can't ask
    either.
-4. Placeholder text like `<employerA>`, `<family-member-1>`, `<care-facility>`,
-   `<personal-image>.png` etc. is a deliberate redaction convention, not a
+4. Placeholder text like `{{employerA}}`, `{{family-member-1}}`, `{{care-facility}}`,
+   `{{personal-image}}.png` etc. is a deliberate redaction convention, not a
    formatting error — take it at face value, **unless** the same placeholder's
    context lets you infer who or what it actually stands for (that's exactly
    worth flagging — see point 2 below).

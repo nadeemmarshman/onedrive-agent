@@ -23,7 +23,7 @@
 
 ## Who I am / context
 
-{{owner}} — hybrid Business Analyst / IT Project Manager based in Johannesburg, South Africa. Targeting both BA and PM roles. Currently unemployed and job hunting. Background includes First National Bank (BA-focused), NCR Atleos/Altron (PM-focused), Agile delivery, payments systems, stakeholder management. Holds a Diploma in Business Analysis and Project Management, PSM I certification. No PMP/PRINCE2.
+{{owner}} — hybrid Business Analyst / IT Project Manager based in Johannesburg, South Africa. Targeting both BA and PM roles. Currently unemployed and job hunting. Background includes {{employerA}} (BA-focused), NCR Atleos/{{employerB}} (PM-focused), Agile delivery, payments systems, stakeholder management. Holds a Diploma in Business Analysis and Project Management, PSM I certification. No PMP/PRINCE2.
 
 This Project ("Career Portfolio & Job Search") holds career portfolio work generally — resume drafting, job search tracking, and technical portfolio projects. This document covers one specific build within that Project.
 

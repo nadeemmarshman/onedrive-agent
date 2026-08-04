@@ -70,7 +70,7 @@ Green-line = the happy path. The agent must correctly find what's there and prop
 
 ### GB-01 — True duplicate (identical content, different name)
 *Proves:* content-hash dedup (not filename matching).
-- **Source (real):** `Copy-Item "$HOME\OneDrive\Documents\<some-file>.pdf" ".\report.pdf"; Copy-Item ".\report.pdf" ".\report_COPY.pdf"`
+- **Source (real):** `Copy-Item "$HOME\OneDrive\Documents\{{some-file}}.pdf" ".\report.pdf"; Copy-Item ".\report.pdf" ".\report_COPY.pdf"`
 - **Create (synthetic):**
   ```powershell
   Set-Content -Path ".\report.txt" -Value "Quarterly report body. Line two." -NoNewline
@@ -180,7 +180,7 @@ bed.
 *Precondition check (confirm before running):*
 ```powershell
 Test-Path "C:\OneDrive-Agent_TestBed\denied.txt"          # expect True
-icacls "C:\OneDrive-Agent_TestBed\denied.txt"              # expect DESKTOP-<host>\<user>:(DENY)(DE)
+icacls "C:\OneDrive-Agent_TestBed\denied.txt"              # expect DESKTOP-{{host}}\{{user}}:(DENY)(DE)
 ```
 
 *Preserve the prior run's evidence first — `pre_run_snapshot.json` is a
@@ -477,7 +477,7 @@ Compare-Object (Import-Csv "C:\OneDrive-Agent_Audit\CP1_manifest.csv") `
 | Observation | Classification | Treatment |
 |---|---|---|
 | `My Music`, `My Pictures`, `My Videos` show OneDrive sync errors ("No access permissions to the item") | OneDrive *account-level* issue — out of this project's lane; not an agent defect | **Excluded from all beds.** Fix separately. The access-denied *class* is already covered synthetically by RB-06, so pilot coverage is not lost. |
-| `Abbys` folder carries a shared-folder marker | Shared folders have different permission/sync semantics | **Excluded from all beds.** Shared/multi-owner behaviour logged as a future consideration, not a pilot case. |
+| `{{family-member-3}}` folder carries a shared-folder marker | Shared folders have different permission/sync semantics | **Excluded from all beds.** Shared/multi-owner behaviour logged as a future consideration, not a pilot case. |
 | Live Documents tree fully hydrated (no natural placeholders) | Coverage nuance | RB-10 creates a placeholder deliberately; sign-off wording must not overclaim placeholder coverage. |
 | Two-bed design (main un-synced + small OneDrive secondary) | Reviewed against the environment change | **Reaffirmed unchanged** — isolation for the bulk of cases, real-sync validation only where OneDrive behaviour is the thing under test (RB-08, RB-10). |
 
