@@ -54,14 +54,18 @@ Remaining in flight:
       record, two unrelated leisure-booking confirmations, and 2 files with
       no ongoing value. 16 files quarantined in total, pending {{owner}}'s
       final delete.
-- [ ] **15 files remain in `Unsorted\`, awaiting {{owner}}'s decision on where
-      each belongs.** Includes: correspondence relating to a closed,
-      unrelated prior personal matter (needs a considered home, not a quick
-      file); insurance/medical-scheme documents; one file that could not be
-      opened for review (protected, needs {{owner}} to open it himself); and
-      several older resume drafts likely superseded by the maintained
-      current-resume folder. Nothing quarantined here without a decision
-      first.
+- [x] **Remaining 15 files resolved, 2026-08-04. `Unsorted\` is now empty
+      (31 → 0).** By {{owner}}'s direction: correspondence relating to a
+      closed, unrelated prior personal matter (3 files) moved to its
+      existing, already-organised folder under Career Documents; 5
+      insurance/medical-scheme documents moved to their existing organised
+      folder under Bank & Insurance; 5 older resume-related files moved to
+      a new sibling folder next to the maintained current-resume folder
+      (`2 Career Documents\2 Archived Resumes\`, created for this); 1 work
+      email and 1 file that could not be opened for review (protected)
+      quarantined to `_Duplicates_PendingDeletion\Unsorted_Triage_20260803\`
+      for {{owner}}'s own review/decision rather than filed automatically.
+      Quarantine folder total now 18 files, pending final delete.
 
 ## 2. Then: send the GitHub Support purge request
 
