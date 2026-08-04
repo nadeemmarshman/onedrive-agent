@@ -153,10 +153,10 @@ the live open item.
       already-deleted files carrying a phone number and out-of-scope
       content purged from history entirely. Verified before and after —
       see RAID I32 for the full method.
-- [ ] **Residual: GitHub's servers may still serve pre-rewrite objects by
-      direct SHA** until GitHub's own GC runs, same class of caveat as
-      I27's purge — but lower urgency here since the repo stayed private
-      throughout and this content was never reachable while public.
-      Consider a GitHub Support purge request for the new unreferenced
-      commits if you want the same server-side confirmation I27 got,
-      otherwise this can be left to GitHub's routine GC.
+- [ ] **Second GitHub Support purge request drafted, 2026-08-04 — awaiting
+      {{owner}} to send.** `GITHUB_SUPPORT_PURGE_REQUEST_20260804.md`,
+      companion to the resolved Ticket 4624306. Covers the ~114 commits
+      superseded by today's history rewrite. Lower urgency than the
+      original — the repo stayed private throughout, this content was
+      never reachable while public — but drafted so it's ready to send
+      rather than left to only routine GC.
