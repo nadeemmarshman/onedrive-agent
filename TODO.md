@@ -147,3 +147,16 @@ the live open item.
 - [ ] **Enable the pre-commit guard on any other clone** of this repo:
       `git config core.hooksPath .githooks` (it is per-clone, not carried
       by the repository itself).
+- [x] **Git history rewritten and force-pushed, 2026-08-04 (RAID I32).**
+      Name redacted across all history in the 35 operational-log files
+      (kept in the 9 identity/portfolio-facing ones); two stray,
+      already-deleted files carrying a phone number and out-of-scope
+      content purged from history entirely. Verified before and after —
+      see RAID I32 for the full method.
+- [ ] **Residual: GitHub's servers may still serve pre-rewrite objects by
+      direct SHA** until GitHub's own GC runs, same class of caveat as
+      I27's purge — but lower urgency here since the repo stayed private
+      throughout and this content was never reachable while public.
+      Consider a GitHub Support purge request for the new unreferenced
+      commits if you want the same server-side confirmation I27 got,
+      otherwise this can be left to GitHub's routine GC.
