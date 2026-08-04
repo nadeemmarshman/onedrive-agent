@@ -20,7 +20,7 @@ Which top-level folders under `1. Documents` overlap with which others, and by h
 | Certificates, DocFolderBackup | 1 | 0.7 |
 | 01-AI-Project-Portfolio, 01-AI-Project-Portfolio | 3 | 0.2 |
 | ShareX, ShareX | 5 | 0.2 |
-| 00-My Folders, DocFolderBackup, HandCock.png | 1 | 0.0 |
+| 00-My Folders, DocFolderBackup, <personal-image>.png | 1 | 0.0 |
 | 01-AI-Project-Portfolio, Default.rdp, NetBeansProjects | 1 | 0.0 |
 
 ---

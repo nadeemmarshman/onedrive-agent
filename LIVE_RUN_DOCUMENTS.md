@@ -26,7 +26,7 @@ This phase was not:
 
 - **6.5 GB of financial, legal and identity documents** — <employerA>
   termination/<dispute-body> records, <tax-authority>, <identity-documents>,
-  <<payslip-record>-records>, resumes. Materially higher consequence for a wrong delete.
+  <payslip-records>, resumes. Materially higher consequence for a wrong delete.
 - **Cross-directory duplication**, not suffix pairs — a stale
   `DocFolderBackup` folder mirrored most of the live tree, and in places
   a folder had been copy-pasted into itself

@@ -10,7 +10,7 @@ verified to total 58 both before execution (decision map checked against
 
 Placed only into folders that already existed in the live tree -- no new
 folders invented to force a placement. Categories: ID documents, resume
-photos, career/resume documents, employment records/<<payslip-record>-records>, the two
+photos, career/resume documents, employment records/<payslip-records>, the two
 <employerA> termination archives (contents not inspected -- still worth opening
 before relying on them), <household-records> warranty photos, <hobby-records>
 reload documentation.

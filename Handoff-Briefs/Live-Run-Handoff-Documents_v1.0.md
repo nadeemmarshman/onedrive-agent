@@ -24,7 +24,7 @@ simple keeper rule. This phase is materially different:
 
 - **6.5 GB, 3,084 files** of financial, legal, and identity documents
   (<employerA> termination/<dispute-body> records, <tax-authority>, <identity-documents>,
-  <<payslip-record>-records>, resumes) — much higher consequence if something is deleted
+  <payslip-records>, resumes) — much higher consequence if something is deleted
   wrongly than a duplicate holiday photo.
 - **Cross-directory duplication**, not same-folder suffix pairs —
   `DocFolderBackup` mirrors most of the live tree from a different
