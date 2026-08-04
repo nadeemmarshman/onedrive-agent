@@ -66,6 +66,10 @@ Remaining in flight:
       quarantined to `_Duplicates_PendingDeletion\Unsorted_Triage_20260803\`
       for {{owner}}'s own review/decision rather than filed automatically.
       Quarantine folder total now 18 files, pending final delete.
+- [x] **Quarantine batch actioned by {{owner}}, 2026-08-04.** All 18 files in
+      `_Duplicates_PendingDeletion\Unsorted_Triage_20260803\` deleted or
+      moved to where {{owner}} wanted them — folder confirmed empty on disk.
+      `Unsorted\` triage is fully closed end to end.
 
 ## 2. Then: send the GitHub Support purge request
 
