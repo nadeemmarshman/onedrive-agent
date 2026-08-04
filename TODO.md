@@ -125,10 +125,14 @@ rather than needing a follow-up if further commits are made.
 **Trigger met 2026-08-04 — Support has confirmed the purge.** This is now
 the live open item.
 
-- [ ] Review the sanitised artefacts as a reader would — particularly the
-      two reports now truncated to their summary sections, and the reports
-      where real names became placeholders. That readability trade-off is
-      worth seeing before the repo is public again.
+- [x] **Independent stranger-read review done, 2026-08-04 (RAID I32).**
+      Found the placeholder delimiter itself was silently stripped by
+      GitHub's own renderer repo-wide, and prompted a real reconsideration
+      of the owner's-name-unredacted decision. Both fixed: delimiter
+      switched to `{{...}}` (verified against GitHub's actual rendering
+      API), name redacted in 36 operational-log files, kept on 9
+      identity/portfolio-facing documents. See RAID I32 and
+      `LESSONS_LEARNED.md` §2 lesson 12 for full detail.
 - [ ] Decide whether to re-publish at all, and whether the résumé links
       still point where you want them to.
 
